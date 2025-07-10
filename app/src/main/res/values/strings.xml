@@ -1,0 +1,83 @@
+<resources>
+    <string name="app_name">IEPIN Personal</string>
+
+    <!-- Auth -->
+    <string name="login">Iniciar Sesión</string>
+    <string name="register">Registrar</string>
+    <string name="email">Correo Electrónico</string>
+    <string name="password">Contraseña</string>
+    <string name="confirm_password">Confirmar Contraseña</string>
+    <string name="logout">Cerrar Sesión</string>
+
+    <!-- Navigation -->
+    <string name="nav_personal">Personal</string>
+    <string name="nav_payments">Pagos</string>
+    <string name="nav_statistics">Estadísticas</string>
+    <string name="nav_profile">Perfil</string>
+
+    <!-- Personal -->
+    <string name="add_employee">Agregar Empleado</string>
+    <string name="employee_name">Nombre del Empleado</string>
+    <string name="employee_position">Cargo</string>
+    <string name="employee_salary">Sueldo Base</string>
+    <string name="employee_dni">DNI</string>
+    <string name="employee_phone">Teléfono</string>
+    <string name="employee_address">Dirección</string>
+
+    <!-- Payments -->
+    <string name="add_payment">Registrar Pago</string>
+    <string name="payment_amount">Monto</string>
+    <string name="payment_date">Fecha de Pago</string>
+    <string name="payment_method">Método de Pago</string>
+    <string name="payment_cash">Efectivo</string>
+    <string name="payment_transfer">Transferencia</string>
+    <string name="payment_yape">YAPE</string>
+    <string name="payment_plin">PLIN</string>
+    <string name="payment_bank">Banco</string>
+    <string name="payment_notes">Observaciones</string>
+
+    <!-- Discounts & Advances -->
+    <string name="add_discount">Agregar Descuento</string>
+    <string name="add_advance">Registrar Adelanto</string>
+    <string name="discount_amount">Monto del Descuento</string>
+    <string name="advance_amount">Monto del Adelanto</string>
+    <string name="discount_reason">Motivo del Descuento</string>
+    <string name="advance_reason">Motivo del Adelanto</string>
+
+    <!-- Statistics -->
+    <string name="total_pending">Total Pendiente</string>
+    <string name="monthly_payment">Pago Mensual</string>
+    <string name="this_month">Este Mes</string>
+    <string name="last_month">Mes Pasado</string>
+
+    <!-- Common -->
+    <string name="save">Guardar</string>
+    <string name="cancel">Cancelar</string>
+    <string name="delete">Eliminar</string>
+    <string name="edit">Editar</string>
+    <string name="loading">Cargando...</string>
+    <string name="error">Error</string>
+    <string name="success">Éxito</string>
+    <string name="confirm">Confirmar</string>
+    <string name="search">Buscar</string>
+    <string name="filter">Filtrar</string>
+    <string name="date">Fecha</string>
+    <string name="amount">Monto</string>
+    <string name="name">Nombre</string>
+    <string name="details">Detalles</string>
+    <string name="history">Historial</string>
+
+    <!-- Error Messages -->
+    <string name="error_empty_field">Este campo es requerido</string>
+    <string name="error_invalid_email">Correo electrónico no válido</string>
+    <string name="error_password_short">La contraseña debe tener al menos 6 caracteres</string>
+    <string name="error_passwords_not_match">Las contraseñas no coinciden</string>
+    <string name="error_connection">Error de conexión</string>
+    <string name="error_auth_failed">Error de autenticación</string>
+
+    <!-- Success Messages -->
+    <string name="success_employee_added">Empleado agregado exitosamente</string>
+    <string name="success_payment_added">Pago registrado exitosamente</string>
+    <string name="success_discount_added">Descuento aplicado exitosamente</string>
+    <string name="success_advance_added">Adelanto registrado exitosamente</string>
+</resources>
