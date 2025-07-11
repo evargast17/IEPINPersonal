@@ -601,3 +601,205 @@ object AppConstants {
     const val MAX_AMOUNT = 999999.99
     const val MIN_AMOUNT = 0.01
 }
+
+// Agregar estas extensiones al final del archivo Extensions.kt existente
+
+// ============================================================================
+// PROFILE & SETTINGS EXTENSIONS
+// ============================================================================
+
+/**
+ * Extensiones para validación de perfil de usuario
+ */
+fun validateProfileName(name: String): String? {
+    return when {
+        name.isBlank() -> "El nombre no puede estar vacío"
+        name.length < 2 -> "El nombre debe tener al menos 2 caracteres"
+        name.length > 50 -> "El nombre no puede tener más de 50 caracteres"
+        !name.matches(Regex("^[a-zA-ZáéíóúÁÉÍÓÚñÑ\\s]+$")) ->
+            "El nombre solo puede contener letras y espacios"
+        else -> null
+    }
+}
+
+fun validateProfileEmail(email: String): String? {
+    return when {
+        email.isBlank() -> "El email no puede estar vacío"
+        !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches() ->
+            "Formato de email no válido"
+        else -> null
+    }
+}
+
+/**
+ * Extensiones para formateo de tiempo relativo
+ */
+fun Long.toRelativeTimeString(): String {
+    val now = System.currentTimeMillis()
+    val diff = now - this
+    val seconds = diff / 1000
+    val minutes = seconds / 60
+    val hours = minutes / 60
+    val days = hours / 24
+    val months = days / 30
+    val years = days / 365
+
+    return when {
+        years > 0 -> if (years == 1L) "hace 1 año" else "hace $years años"
+        months > 0 -> if (months == 1L) "hace 1 mes" else "hace $months meses"
+        days > 0 -> if (days == 1L) "hace 1 día" else "hace $days días"
+        hours > 0 -> if (hours == 1L) "hace 1 hora" else "hace $hours horas"
+        minutes > 0 -> if (minutes == 1L) "hace 1 minuto" else "hace $minutes minutos"
+        else -> "hace unos segundos"
+    }
+}
+
+/**
+ * Extensiones para el modelo User existente
+ */
+fun com.e17kapps.iepinpersonal.domain.model.User.getInitials(): String {
+    return if (name.isNotBlank()) {
+        name.split(" ")
+            .take(2)
+            .map { it.first().uppercase() }
+            .joinToString("")
+    } else {
+        "U"
+    }
+}
+
+fun com.e17kapps.iepinpersonal.domain.model.User.getDisplayName(): String {
+    return name.ifBlank { "Usuario" }
+}
+
+fun com.e17kapps.iepinpersonal.domain.model.User.isAdmin(): Boolean {
+    return role == com.e17kapps.iepinpersonal.domain.model.UserRole.ADMIN
+}
+
+fun com.e17kapps.iepinpersonal.domain.model.User.getAccountAge(): String {
+    return createdAt.toRelativeTimeString()
+}
+
+fun com.e17kapps.iepinpersonal.domain.model.User.getLastUpdateTime(): String {
+    return updatedAt.toRelativeTimeString()
+}
+
+/**
+ * Utilidades para configuración de la aplicación
+ */
+object SettingsConstants {
+    const val PREF_THEME = "app_theme"
+    const val PREF_LANGUAGE = "app_language"
+    const val PREF_NOTIFICATIONS = "notifications_enabled"
+    const val PREF_AUTO_BACKUP = "auto_backup_enabled"
+    const val PREF_BIOMETRIC = "biometric_enabled"
+    const val PREF_PIN_REQUIRED = "pin_required"
+    const val PREF_AUTO_LOCK_TIME = "auto_lock_time"
+    const val PREF_CURRENCY = "currency"
+    const val PREF_DATE_FORMAT = "date_format"
+    const val PREF_TIME_FORMAT = "time_format"
+
+    // Valores por defecto
+    const val DEFAULT_AUTO_LOCK_TIME = 5
+    const val DEFAULT_CURRENCY = "PEN"
+    const val DEFAULT_DATE_FORMAT = "dd/MM/yyyy"
+    const val DEFAULT_TIME_FORMAT = "HH:mm"
+    const val DEFAULT_LANGUAGE = "es"
+}
+
+/**
+ * Extensiones para manejo de versiones y información de la app
+ */
+object AppInfo {
+    const val VERSION_NAME = "1.0.0"
+    const val VERSION_CODE = 1
+    const val BUILD_DATE = "Julio 2025"
+    const val DEVELOPER = "E17K Apps"
+    const val SUPPORT_EMAIL = "soporte@e17kapps.com"
+    const val PRIVACY_URL = "https://e17kapps.com/privacy"
+    const val TERMS_URL = "https://e17kapps.com/terms"
+    const val HELP_URL = "https://e17kapps.com/help"
+}
+
+/**
+ * Extensiones para validación de configuración
+ */
+fun String.isValidTheme(): Boolean {
+    return this in listOf("LIGHT", "DARK", "SYSTEM")
+}
+
+fun String.isValidLanguage(): Boolean {
+    return this in listOf("es", "en")
+}
+
+fun Int.isValidAutoLockTime(): Boolean {
+    return this in 1..60 // Entre 1 y 60 minutos
+}
+
+fun String.isValidCurrency(): Boolean {
+    return this in listOf("PEN", "USD", "EUR") // Monedas soportadas
+}
+
+/**
+ * Utilidades para debugging y desarrollo
+ */
+object ProfileDebugUtils {
+    fun logUserInfo(user: com.e17kapps.iepinpersonal.domain.model.User?) {
+        if (user != null) {
+            android.util.Log.d("ProfileDebug", "Usuario: ${user.name} (${user.email})")
+            android.util.Log.d("ProfileDebug", "Rol: ${user.role.displayName}")
+            android.util.Log.d("ProfileDebug", "Activo: ${user.isActive}")
+            android.util.Log.d("ProfileDebug", "Creado: ${user.createdAt.toDateTimeString()}")
+        } else {
+            android.util.Log.w("ProfileDebug", "Usuario nulo")
+        }
+    }
+}
+
+/**
+ * Extensiones adicionales para formateo
+ */
+fun String.toTitleCase(): String {
+    return split(" ").joinToString(" ") { word ->
+        word.lowercase().replaceFirstChar {
+            if (it.isLowerCase()) it.titlecase() else it.toString()
+        }
+    }
+}
+
+fun String.removeExtraSpaces(): String {
+    return trim().replace(Regex("\\s+"), " ")
+}
+
+/**
+ * Utilidades para validación de configuración avanzada
+ */
+object ConfigValidationUtils {
+
+    fun isValidNotificationTime(time: String): Boolean {
+        return try {
+            val parts = time.split(":")
+            if (parts.size != 2) return false
+            val hour = parts[0].toInt()
+            val minute = parts[1].toInt()
+            hour in 0..23 && minute in 0..59
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+    fun formatNotificationTime(hour: Int, minute: Int): String {
+        return String.format("%02d:%02d", hour, minute)
+    }
+
+    fun parseNotificationTime(time: String): Pair<Int, Int>? {
+        return try {
+            val parts = time.split(":")
+            if (parts.size == 2) {
+                Pair(parts[0].toInt(), parts[1].toInt())
+            } else null
+        } catch (e: Exception) {
+            null
+        }
+    }
+}

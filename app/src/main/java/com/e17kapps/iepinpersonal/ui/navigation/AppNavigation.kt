@@ -6,7 +6,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -260,7 +259,7 @@ fun MainAppNavigation(
 
         // Profile Routes
         composable(NavigationRoutes.Profile.route) {
-            ProfileScreen(
+            com.e17kapps.iepinpersonal.ui.screens.profile.ProfileScreen(
                 onLogout = onLogout,
                 onNavigateToSettings = {
                     navController.navigate(NavigationRoutes.Settings.route)
@@ -278,20 +277,17 @@ fun MainAppNavigation(
     }
 }
 
-// Implementaciones placeholder para las pantallas que faltan
 @Composable
 fun EditEmployeeScreen(
     employeeId: String,
     onNavigateBack: () -> Unit,
     onEmployeeUpdated: () -> Unit
 ) {
-    // TODO: Implementar pantalla de edición de empleado
-    androidx.compose.foundation.layout.Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = androidx.compose.ui.Alignment.Center
-    ) {
-        androidx.compose.material3.Text("Editar Empleado: $employeeId")
-    }
+    com.e17kapps.iepinpersonal.ui.screens.personal.EditEmployeeScreen(
+        employeeId = employeeId,
+        onNavigateBack = onNavigateBack,
+        onEmployeeUpdated = onEmployeeUpdated
+    )
 }
 
 @Composable
@@ -301,13 +297,12 @@ fun EmployeeDetailScreen(
     onNavigateToEdit: () -> Unit,
     onNavigateToPaymentHistory: () -> Unit
 ) {
-    // TODO: Implementar pantalla de detalle de empleado
-    androidx.compose.foundation.layout.Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = androidx.compose.ui.Alignment.Center
-    ) {
-        androidx.compose.material3.Text("Detalle Empleado: $employeeId")
-    }
+    com.e17kapps.iepinpersonal.ui.screens.personal.EmployeeDetailScreen(
+        employeeId = employeeId,
+        onNavigateBack = onNavigateBack,
+        onNavigateToEdit = onNavigateToEdit,
+        onNavigateToPaymentHistory = onNavigateToPaymentHistory
+    )
 }
 
 @Composable
@@ -329,13 +324,10 @@ fun PaymentHistoryScreen(
     employeeId: String,
     onNavigateBack: () -> Unit
 ) {
-    // TODO: Implementar pantalla de historial de pagos
-    androidx.compose.foundation.layout.Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = androidx.compose.ui.Alignment.Center
-    ) {
-        androidx.compose.material3.Text("Historial Pagos: $employeeId")
-    }
+    PaymentHistoryScreen(
+        employeeId = employeeId,
+        onNavigateBack = onNavigateBack
+    )
 }
 
 @Composable
@@ -357,13 +349,10 @@ fun EmployeeStatisticsScreen(
     employeeId: String,
     onNavigateBack: () -> Unit
 ) {
-    // TODO: Implementar pantalla de estadísticas de empleado
-    androidx.compose.foundation.layout.Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = androidx.compose.ui.Alignment.Center
-    ) {
-        androidx.compose.material3.Text("Estadísticas Empleado: $employeeId")
-    }
+    com.e17kapps.iepinpersonal.ui.screens.personal.EmployeeStatisticsScreen(
+        employeeId = employeeId,
+        onNavigateBack = onNavigateBack
+    )
 }
 
 @Composable
@@ -386,32 +375,17 @@ fun ProfileScreen(
     onLogout: () -> Unit,
     onNavigateToSettings: () -> Unit
 ) {
-    // TODO: Implementar pantalla de perfil
-    androidx.compose.foundation.layout.Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = androidx.compose.ui.Alignment.Center
-    ) {
-        androidx.compose.foundation.layout.Column(
-            horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally,
-            verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(16.dp)
-        ) {
-            androidx.compose.material3.Text("Perfil de Usuario")
-            androidx.compose.material3.Button(onClick = onLogout) {
-                androidx.compose.material3.Text("Cerrar Sesión")
-            }
-        }
-    }
+    com.e17kapps.iepinpersonal.ui.screens.profile.ProfileScreen(
+        onLogout = onLogout,
+        onNavigateToSettings = onNavigateToSettings
+    )
 }
 
 @Composable
 fun SettingsScreen(
     onNavigateBack: () -> Unit
 ) {
-    // TODO: Implementar pantalla de configuración
-    androidx.compose.foundation.layout.Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = androidx.compose.ui.Alignment.Center
-    ) {
-        androidx.compose.material3.Text("Configuración")
-    }
+    com.e17kapps.iepinpersonal.ui.screens.settings.SettingsScreen(
+        onNavigateBack = onNavigateBack
+    )
 }

@@ -199,3 +199,135 @@ enum class BatchOperation(val displayName: String) {
     EXPORT("Exportar"),
     BULK_PAYMENT("Pago Masivo")
 }
+
+// Profile
+
+data class ProfileUiState(
+    val isLoading: Boolean = false,
+    val errorMessage: String? = null,
+    val successMessage: String? = null,
+    val logoutSuccess: Boolean = false,
+    val isEditingProfile: Boolean = false,
+    val profileUpdateSuccess: Boolean = false
+)
+
+data class SettingsUiState(
+    val isDarkModeEnabled: Boolean = false,
+    val notificationsEnabled: Boolean = true,
+    val autoBackupEnabled: Boolean = false,
+    val lastBackupDate: Long? = null,
+    val appVersion: String = "1.0.0",
+    val isLoading: Boolean = false,
+    val errorMessage: String? = null,
+    val successMessage: String? = null
+)
+
+data class UserPreferences(
+    val theme: AppTheme = AppTheme.SYSTEM,
+    val language: AppLanguage = AppLanguage.SPANISH,
+    val notifications: NotificationSettings = NotificationSettings(),
+    val currency: String = "PEN",
+    val dateFormat: String = "dd/MM/yyyy",
+    val timeFormat: String = "HH:mm"
+)
+
+enum class AppTheme(val displayName: String) {
+    LIGHT("Claro"),
+    DARK("Oscuro"),
+    SYSTEM("Sistema")
+}
+
+enum class AppLanguage(val displayName: String, val code: String) {
+    SPANISH("Español", "es"),
+    ENGLISH("English", "en")
+}
+
+data class NotificationSettings(
+    val enabled: Boolean = true,
+    val paymentReminders: Boolean = true,
+    val employeeUpdates: Boolean = true,
+    val systemNotifications: Boolean = true,
+    val emailNotifications: Boolean = false,
+    val reminderTime: String = "09:00"
+)
+
+data class DataManagementState(
+    val isBackingUp: Boolean = false,
+    val isExporting: Boolean = false,
+    val lastBackupDate: Long? = null,
+    val backupProgress: Float = 0f,
+    val exportProgress: Float = 0f,
+    val errorMessage: String? = null,
+    val successMessage: String? = null
+)
+
+data class SecuritySettings(
+    val requirePinOnStartup: Boolean = false,
+    val biometricEnabled: Boolean = false,
+    val autoLockTime: Int = 5, // minutos
+    val dataEncryptionEnabled: Boolean = true
+)
+
+data class ProfileValidationState(
+    val nameError: String? = null,
+    val emailError: String? = null,
+    val isNameValid: Boolean = true,
+    val isEmailValid: Boolean = true,
+    val canSaveProfile: Boolean = false
+) {
+    val hasErrors: Boolean
+        get() = nameError != null || emailError != null
+
+    val isFormValid: Boolean
+        get() = isNameValid && isEmailValid && !hasErrors
+}
+
+data class UserAnalytics(
+    val totalEmployeesCreated: Int = 0,
+    val totalPaymentsProcessed: Int = 0,
+    val totalAmountProcessed: Double = 0.0,
+    val accountAge: Long = 0,
+    val lastLoginDate: Long = 0,
+    val loginCount: Int = 0,
+    val favoritePaymentMethod: String? = null,
+    val averageMonthlyPayments: Double = 0.0
+)
+
+data class AdvancedSettings(
+    val debugModeEnabled: Boolean = false,
+    val analyticsEnabled: Boolean = true,
+    val crashReportingEnabled: Boolean = true,
+    val betaFeaturesEnabled: Boolean = false,
+    val developerOptionsVisible: Boolean = false
+)
+
+sealed class SettingsError(val message: String) {
+    object BackupFailed : SettingsError("Error al realizar respaldo")
+    object ExportFailed : SettingsError("Error al exportar datos")
+    object PreferencesSaveFailed : SettingsError("Error al guardar configuración")
+    object NetworkError : SettingsError("Error de conexión")
+    data class UnknownError(val details: String) : SettingsError(details)
+}
+
+sealed class SettingsResult<out T> {
+    data class Success<T>(val data: T) : SettingsResult<T>()
+    data class Error(val error: SettingsError) : SettingsResult<Nothing>()
+    object Loading : SettingsResult<Nothing>()
+}
+
+data class OnboardingState(
+    val isFirstLaunch: Boolean = false,
+    val hasSeenProfileTutorial: Boolean = false,
+    val hasSeenPaymentTutorial: Boolean = false,
+    val hasSeenEmployeeTutorial: Boolean = false,
+    val currentTutorialStep: Int = 0,
+    val isTutorialVisible: Boolean = false
+)
+
+data class FeedbackState(
+    val hasRatedApp: Boolean = false,
+    val feedbackGiven: Boolean = false,
+    val lastFeedbackDate: Long = 0,
+    val appUsageCount: Int = 0,
+    val shouldShowRatingPrompt: Boolean = false
+)

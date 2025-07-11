@@ -184,7 +184,8 @@ val bottomNavItems = listOf(
     BottomNavItem.Dashboard,
     BottomNavItem.Employees,
     BottomNavItem.Payments,
-    BottomNavItem.Statistics
+    BottomNavItem.Statistics,
+    BottomNavItem.Profile
 )
 
 // ============================================================================
