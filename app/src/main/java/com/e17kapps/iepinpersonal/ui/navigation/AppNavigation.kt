@@ -236,7 +236,7 @@ fun MainAppNavigation(
                 }
             )
         }
-        /*
+
         composable(NavigationRoutes.PaymentHistory.route) { backStackEntry ->
             val employeeId = backStackEntry.arguments?.getString("employeeId") ?: ""
             PaymentHistoryScreen(
@@ -246,7 +246,7 @@ fun MainAppNavigation(
                 }
             )
         }
-         */
+
 
         // Statistics Routes - OPTIMIZADO
         composable(NavigationRoutes.Statistics.route) {
@@ -371,7 +371,7 @@ fun PaymentDetailScreen(
         Text("Detalle Pago: $paymentId\n(Implementar pantalla)")
     }
 }
-/*
+
 @Composable
 fun PaymentHistoryScreen(
     employeeId: String,
@@ -382,7 +382,7 @@ fun PaymentHistoryScreen(
         onNavigateBack = onNavigateBack
     )
 }
-*/
+
 
 @Composable
 fun StatisticsScreen(

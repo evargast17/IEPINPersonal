@@ -119,4 +119,5 @@ object AppColors {
     val onSecondary = Color.White
     val onSurface = Color.Black
     val onBackground = Color.Black
+
 }
