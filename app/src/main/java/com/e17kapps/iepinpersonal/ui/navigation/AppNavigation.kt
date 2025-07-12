@@ -335,14 +335,12 @@ fun StatisticsScreen(
     onNavigateToEmployeeStats: (String) -> Unit,
     onNavigateToMonthlyReport: (Int, Int) -> Unit
 ) {
-    // TODO: Implementar pantalla de estadísticas
-    androidx.compose.foundation.layout.Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = androidx.compose.ui.Alignment.Center
-    ) {
-        androidx.compose.material3.Text("Estadísticas")
-    }
+    com.e17kapps.iepinpersonal.ui.screens.statistics.StatisticsScreen(
+        onNavigateToEmployeeStats = onNavigateToEmployeeStats,
+        onNavigateToMonthlyReport = onNavigateToMonthlyReport
+    )
 }
+
 
 @Composable
 fun EmployeeStatisticsScreen(
@@ -361,13 +359,11 @@ fun MonthlyReportScreen(
     year: Int,
     onNavigateBack: () -> Unit
 ) {
-    // TODO: Implementar pantalla de reporte mensual
-    androidx.compose.foundation.layout.Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = androidx.compose.ui.Alignment.Center
-    ) {
-        androidx.compose.material3.Text("Reporte Mensual: $month/$year")
-    }
+    com.e17kapps.iepinpersonal.ui.screens.statistics.MonthlyReportScreen(
+        month = month,
+        year = year,
+        onNavigateBack = onNavigateBack
+    )
 }
 
 @Composable

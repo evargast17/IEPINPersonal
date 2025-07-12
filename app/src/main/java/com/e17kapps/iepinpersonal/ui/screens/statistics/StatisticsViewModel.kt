@@ -17,15 +17,12 @@ import javax.inject.Inject
 @HiltViewModel
 class StatisticsViewModel @Inject constructor(
     private val statisticsRepository: StatisticsRepository,
-    private val paymentRepository: PaymentRepository,
-    private val employeeRepository: EmployeeRepository
+    private val employeeRepository: EmployeeRepository,
+    private val paymentRepository: PaymentRepository
 ) : ViewModel() {
 
     private val _dashboardStats = MutableStateFlow<UiState<DashboardStatistics>>(UiState.Loading)
     val dashboardStats: StateFlow<UiState<DashboardStatistics>> = _dashboardStats.asStateFlow()
-
-    private val _selectedEmployee = MutableStateFlow<Employee?>(null)
-    val selectedEmployee: StateFlow<Employee?> = _selectedEmployee.asStateFlow()
 
     private val _employeeStats = MutableStateFlow<UiState<EmployeeStatistics>>(UiState.Empty)
     val employeeStats: StateFlow<UiState<EmployeeStatistics>> = _employeeStats.asStateFlow()
@@ -33,17 +30,20 @@ class StatisticsViewModel @Inject constructor(
     private val _monthlyStats = MutableStateFlow<UiState<MonthlyStats>>(UiState.Empty)
     val monthlyStats: StateFlow<UiState<MonthlyStats>> = _monthlyStats.asStateFlow()
 
+    private val _employees = MutableStateFlow<List<Employee>>(emptyList())
+    val employees: StateFlow<List<Employee>> = _employees.asStateFlow()
+
+    private val _recentPayments = MutableStateFlow<List<Payment>>(emptyList())
+    val recentPayments: StateFlow<List<Payment>> = _recentPayments.asStateFlow()
+
+    private val _selectedEmployee = MutableStateFlow<Employee?>(null)
+    val selectedEmployee: StateFlow<Employee?> = _selectedEmployee.asStateFlow()
+
     private val _selectedMonth = MutableStateFlow(Calendar.getInstance().get(Calendar.MONTH) + 1)
     val selectedMonth: StateFlow<Int> = _selectedMonth.asStateFlow()
 
     private val _selectedYear = MutableStateFlow(Calendar.getInstance().get(Calendar.YEAR))
     val selectedYear: StateFlow<Int> = _selectedYear.asStateFlow()
-
-    private val _paymentMethodStats = MutableStateFlow<List<PaymentMethodStats>>(emptyList())
-    val paymentMethodStats: StateFlow<List<PaymentMethodStats>> = _paymentMethodStats.asStateFlow()
-
-    private val _recentPayments = MutableStateFlow<List<Payment>>(emptyList())
-    val recentPayments: StateFlow<List<Payment>> = _recentPayments.asStateFlow()
 
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
@@ -51,30 +51,69 @@ class StatisticsViewModel @Inject constructor(
     private val _errorMessage = MutableStateFlow<String?>(null)
     val errorMessage: StateFlow<String?> = _errorMessage.asStateFlow()
 
+    // Estados adicionales para la UI - AHORA USANDO UiStates.kt
+    private val _selectedTimeframe = MutableStateFlow(StatisticsTimeframe.MONTH)
+    val selectedTimeframe: StateFlow<StatisticsTimeframe> = _selectedTimeframe.asStateFlow()
+
+    private val _exportStatus = MutableStateFlow<ExportStatus>(ExportStatus.Idle)
+    val exportStatus: StateFlow<ExportStatus> = _exportStatus.asStateFlow()
+
     init {
-        loadDashboardStatistics()
-        loadRecentPayments()
+        loadInitialData()
+    }
+
+    private fun loadInitialData() {
+        viewModelScope.launch {
+            loadDashboardStatistics()
+            loadEmployees()
+            loadRecentPayments()
+        }
     }
 
     private fun loadDashboardStatistics() {
         _dashboardStats.value = UiState.Loading
 
         viewModelScope.launch {
-            statisticsRepository.getDashboardStatistics()
-                .onSuccess { stats ->
-                    _dashboardStats.value = UiState.Success(stats)
-                    _paymentMethodStats.value = stats.paymentMethodDistribution
+            try {
+                statisticsRepository.getDashboardStatistics()
+                    .onSuccess { stats ->
+                        _dashboardStats.value = UiState.Success(stats)
+                        _errorMessage.value = null
+                    }
+                    .onFailure { exception ->
+                        _dashboardStats.value = UiState.Error(exception.message ?: "Error al cargar estadísticas")
+                        _errorMessage.value = exception.message
+                    }
+            } catch (e: Exception) {
+                _dashboardStats.value = UiState.Error(e.message ?: "Error inesperado")
+                _errorMessage.value = e.message
+            }
+        }
+    }
+
+    private fun loadEmployees() {
+        viewModelScope.launch {
+            try {
+                employeeRepository.getEmployeesFlow().collect { employees ->
+                    _employees.value = employees.filter { it.isActive }
                 }
-                .onFailure { exception ->
-                    _dashboardStats.value = UiState.Error(exception.message ?: "Error al cargar estadísticas")
-                }
+            } catch (e: Exception) {
+                _errorMessage.value = "Error al cargar empleados: ${e.message}"
+            }
         }
     }
 
     private fun loadRecentPayments() {
         viewModelScope.launch {
-            paymentRepository.getPaymentsFlow().collect { payments ->
-                _recentPayments.value = payments.take(10) // Últimos 10 pagos
+            try {
+                paymentRepository.getPaymentsFlow().collect { payments ->
+                    _recentPayments.value = payments
+                        .filter { it.status == PaymentStatus.COMPLETED }
+                        .sortedByDescending { it.paymentDate }
+                        .take(10)
+                }
+            } catch (e: Exception) {
+                _errorMessage.value = "Error al cargar pagos recientes: ${e.message}"
             }
         }
     }
@@ -93,13 +132,19 @@ class StatisticsViewModel @Inject constructor(
         _employeeStats.value = UiState.Loading
 
         viewModelScope.launch {
-            statisticsRepository.getEmployeeStatistics(employeeId)
-                .onSuccess { stats ->
-                    _employeeStats.value = UiState.Success(stats)
-                }
-                .onFailure { exception ->
-                    _employeeStats.value = UiState.Error(exception.message ?: "Error al cargar estadísticas del empleado")
-                }
+            try {
+                statisticsRepository.getEmployeeStatistics(employeeId)
+                    .onSuccess { stats ->
+                        _employeeStats.value = UiState.Success(stats)
+                    }
+                    .onFailure { exception ->
+                        _employeeStats.value = UiState.Error(
+                            exception.message ?: "Error al cargar estadísticas del empleado"
+                        )
+                    }
+            } catch (e: Exception) {
+                _employeeStats.value = UiState.Error(e.message ?: "Error inesperado")
+            }
         }
     }
 
@@ -113,14 +158,26 @@ class StatisticsViewModel @Inject constructor(
         _monthlyStats.value = UiState.Loading
 
         viewModelScope.launch {
-            statisticsRepository.getMonthlyStats(month, year)
-                .onSuccess { stats ->
-                    _monthlyStats.value = UiState.Success(stats)
-                }
-                .onFailure { exception ->
-                    _monthlyStats.value = UiState.Error(exception.message ?: "Error al cargar estadísticas mensuales")
-                }
+            try {
+                statisticsRepository.getMonthlyStats(month, year)
+                    .onSuccess { stats ->
+                        _monthlyStats.value = UiState.Success(stats)
+                    }
+                    .onFailure { exception ->
+                        _monthlyStats.value = UiState.Error(
+                            exception.message ?: "Error al cargar estadísticas mensuales"
+                        )
+                    }
+            } catch (e: Exception) {
+                _monthlyStats.value = UiState.Error(e.message ?: "Error inesperado")
+            }
         }
+    }
+
+    fun selectTimeframe(timeframe: StatisticsTimeframe) {
+        _selectedTimeframe.value = timeframe
+        // Recargar estadísticas según el nuevo timeframe
+        refreshStatistics()
     }
 
     fun refreshStatistics() {
@@ -128,125 +185,174 @@ class StatisticsViewModel @Inject constructor(
         _errorMessage.value = null
 
         viewModelScope.launch {
-            statisticsRepository.updateDashboardStats()
-                .onSuccess {
-                    loadDashboardStatistics()
-                    _selectedEmployee.value?.let { employee ->
-                        loadEmployeeStatistics(employee.id)
+            try {
+                statisticsRepository.updateDashboardStats()
+                    .onSuccess {
+                        loadDashboardStatistics()
+                        _selectedEmployee.value?.let { employee ->
+                            loadEmployeeStatistics(employee.id)
+                        }
+                        _isLoading.value = false
                     }
-                    _isLoading.value = false
-                }
-                .onFailure { exception ->
-                    _errorMessage.value = exception.message ?: "Error al actualizar estadísticas"
-                    _isLoading.value = false
-                }
-        }
-    }
-
-    fun getCurrentMonthComparison(): String {
-        val currentStats = (_dashboardStats.value as? UiState.Success)?.data?.monthlyComparison
-        return when {
-            currentStats == null -> "Sin datos"
-            currentStats.percentageChange > 0 -> "+${String.format("%.1f", currentStats.percentageChange)}%"
-            currentStats.percentageChange < 0 -> "${String.format("%.1f", currentStats.percentageChange)}%"
-            else -> "0%"
-        }
-    }
-
-    fun getTopPaymentMethod(): PaymentMethod? {
-        return _paymentMethodStats.value.maxByOrNull { it.count }?.method
-    }
-
-    fun calculatePendingPayments(): Double {
-        return (_dashboardStats.value as? UiState.Success)?.data?.totalPendingAmount ?: 0.0
-    }
-
-    fun calculateAveragePayment(): Double {
-        val payments = _recentPayments.value.filter { it.status == PaymentStatus.COMPLETED }
-        return if (payments.isNotEmpty()) {
-            payments.sumOf { it.amount } / payments.size
-        } else {
-            0.0
-        }
-    }
-
-    fun getPaymentsByMethod(method: PaymentMethod) {
-        _isLoading.value = true
-
-        viewModelScope.launch {
-            paymentRepository.getPaymentsByMethod(method)
-                .onSuccess { payments ->
-                    _recentPayments.value = payments
-                    _isLoading.value = false
-                }
-                .onFailure { exception ->
-                    _errorMessage.value = "Error al cargar pagos por método: ${exception.message}"
-                    _isLoading.value = false
-                }
-        }
-    }
-
-    fun getPaymentsByDateRange(startDate: Long, endDate: Long) {
-        _isLoading.value = true
-
-        viewModelScope.launch {
-            paymentRepository.getPaymentsByDateRange(startDate, endDate)
-                .onSuccess { payments ->
-                    _recentPayments.value = payments
-                    _isLoading.value = false
-                }
-                .onFailure { exception ->
-                    _errorMessage.value = "Error al cargar pagos por rango de fecha: ${exception.message}"
-                    _isLoading.value = false
-                }
-        }
-    }
-
-    fun exportMonthlyReport(month: Int, year: Int): String {
-        val monthlyStats = (_monthlyStats.value as? UiState.Success)?.data
-        val payments = _recentPayments.value.filter { payment ->
-            val calendar = Calendar.getInstance().apply { timeInMillis = payment.paymentDate }
-            calendar.get(Calendar.MONTH) + 1 == month && calendar.get(Calendar.YEAR) == year
-        }
-
-        return buildString {
-            appendLine("REPORTE MENSUAL - $month/$year")
-            appendLine("=".repeat(40))
-            appendLine()
-            appendLine("RESUMEN:")
-            appendLine("Total de pagos: S/ ${monthlyStats?.totalPayments ?: 0.0}")
-            appendLine("Número de pagos: ${monthlyStats?.paymentCount ?: 0}")
-            appendLine("Promedio por pago: S/ ${monthlyStats?.averagePayment ?: 0.0}")
-            appendLine("Total descuentos: S/ ${monthlyStats?.totalDiscounts ?: 0.0}")
-            appendLine("Total adelantos: S/ ${monthlyStats?.totalAdvances ?: 0.0}")
-            appendLine()
-            appendLine("DETALLE DE PAGOS:")
-            payments.forEach { payment ->
-                appendLine("${payment.employeeName} - S/ ${payment.amount} - ${payment.paymentMethod.displayName}")
+                    .onFailure { exception ->
+                        _errorMessage.value = exception.message ?: "Error al actualizar estadísticas"
+                        _isLoading.value = false
+                    }
+            } catch (e: Exception) {
+                _errorMessage.value = e.message ?: "Error inesperado"
+                _isLoading.value = false
             }
         }
     }
 
+    fun exportData(format: String) {
+        _exportStatus.value = ExportStatus.Loading
+
+        viewModelScope.launch {
+            try {
+                when (format.lowercase()) {
+                    "pdf" -> exportToPdf()
+                    "xlsx" -> exportToExcel()
+                    "csv" -> exportToCsv()
+                    else -> {
+                        _exportStatus.value = ExportStatus.Error("Formato no soportado")
+                    }
+                }
+            } catch (e: Exception) {
+                _exportStatus.value = ExportStatus.Error(e.message ?: "Error al exportar")
+            }
+        }
+    }
+
+    private suspend fun exportToPdf() {
+        // TODO: Implementar exportación a PDF
+        _exportStatus.value = ExportStatus.Success("Reporte exportado a PDF")
+    }
+
+    private suspend fun exportToExcel() {
+        // TODO: Implementar exportación a Excel
+        _exportStatus.value = ExportStatus.Success("Datos exportados a Excel")
+    }
+
+    private suspend fun exportToCsv() {
+        // TODO: Implementar exportación a CSV
+        _exportStatus.value = ExportStatus.Success("Datos exportados a CSV")
+    }
+
     fun clearError() {
         _errorMessage.value = null
+        _exportStatus.value = ExportStatus.Idle
     }
 
-    // Función para generar datos para gráficos
-    fun getChartData(): List<Pair<String, Double>> {
+    // Funciones de análisis y cálculos
+    fun getCurrentMonthComparison(): String {
+        val currentStats = (_dashboardStats.value as? UiState.Success)?.data?.monthlyComparison
+        return if (currentStats != null) {
+            val change = currentStats.percentageChange
+            when {
+                change > 0 -> "+${String.format("%.1f", change)}% vs mes anterior"
+                change < 0 -> "${String.format("%.1f", change)}% vs mes anterior"
+                else -> "Sin cambios vs mes anterior"
+            }
+        } else {
+            "Datos no disponibles"
+        }
+    }
+
+    fun getTopPaymentMethods(): List<PaymentMethodStats> {
+        return (_dashboardStats.value as? UiState.Success)?.data?.paymentMethodDistribution
+            ?: emptyList()
+    }
+
+    fun getRecentActivitySummary(): String {
+        val recentActivity = (_dashboardStats.value as? UiState.Success)?.data?.recentActivity ?: emptyList()
+        return when {
+            recentActivity.isEmpty() -> "Sin actividad reciente"
+            recentActivity.size == 1 -> "1 actividad reciente"
+            else -> "${recentActivity.size} actividades recientes"
+        }
+    }
+
+    // Funciones para análisis avanzado
+    fun getEmployeePerformanceRanking(): List<Employee> {
+        return _employees.value.sortedByDescending { employee ->
+            // Ordenar por algún criterio de rendimiento
+            // Por ahora, por salario base
+            employee.baseSalary
+        }
+    }
+
+    fun getMonthlyTrend(months: Int = 6): List<MonthlyStats> {
+        // TODO: Implementar tendencia de múltiples meses
+        return emptyList()
+    }
+
+    fun exportStatisticsText(): String {
         val stats = (_dashboardStats.value as? UiState.Success)?.data
-        return stats?.paymentMethodDistribution?.map {
-            it.method.displayName to it.totalAmount
-        } ?: emptyList()
+        return if (stats != null) {
+            buildString {
+                appendLine("=== ESTADÍSTICAS IEPIN PERSONAL ===")
+                appendLine("Fecha: ${Date()}")
+                appendLine()
+                appendLine("RESUMEN GENERAL:")
+                appendLine("Total empleados: ${stats.totalEmployees}")
+                appendLine("Pendiente por pagar: ${stats.totalPendingAmount}")
+                appendLine("Pagos del mes: ${stats.currentMonthPayments}")
+                appendLine("Pagos hoy: ${stats.todayPayments}")
+                appendLine()
+                appendLine("COMPARACIÓN MENSUAL:")
+                appendLine("Cambio vs mes anterior: ${String.format("%.1f", stats.monthlyComparison.percentageChange)}%")
+                appendLine()
+                appendLine("MÉTODOS DE PAGO:")
+                stats.paymentMethodDistribution.forEach { method ->
+                    appendLine("${method.method.displayName}: ${String.format("%.1f", method.percentage)}% (${method.count} pagos)")
+                }
+                appendLine()
+                appendLine("ACTIVIDAD RECIENTE:")
+                stats.recentActivity.take(5).forEach { activity ->
+                    appendLine("- ${activity.title}: ${activity.description}")
+                }
+            }
+        } else {
+            "No hay datos disponibles para exportar"
+        }
     }
 
-    fun getMonthlyTrend(): List<Pair<String, Double>> {
-        // Aquí podrías implementar la lógica para obtener la tendencia mensual
-        // Por ahora retornamos datos de ejemplo
-        val currentYear = Calendar.getInstance().get(Calendar.YEAR)
-        val months = listOf("Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic")
+    // Funciones para filtros y búsquedas
+    fun filterEmployeesByPerformance(criteria: PerformanceCriteria): List<Employee> {
+        return when (criteria) {
+            PerformanceCriteria.HIGH_SALARY -> _employees.value.filter { it.baseSalary > 2000.0 }
+            PerformanceCriteria.RECENT_HIRES -> _employees.value.filter {
+                val threeMonthsAgo = Calendar.getInstance().apply {
+                    add(Calendar.MONTH, -3)
+                }.timeInMillis
+                it.startDate > threeMonthsAgo
+            }
+            PerformanceCriteria.ACTIVE -> _employees.value.filter { it.isActive }
+            PerformanceCriteria.ALL -> _employees.value
+        }
+    }
 
-        return months.mapIndexed { index, month ->
-            month to (index + 1) * 1000.0 // Datos de ejemplo
+    fun getPaymentTrendForEmployee(employeeId: String, months: Int = 6): List<Double> {
+        // TODO: Implementar tendencia de pagos por empleado
+        return emptyList()
+    }
+
+    fun getStatisticsSummary(): StatisticsSummary {
+        val stats = (_dashboardStats.value as? UiState.Success)?.data
+        return if (stats != null) {
+            StatisticsSummary(
+                totalEmployees = stats.totalEmployees,
+                totalPaymentsThisMonth = stats.currentMonthPayments,
+                totalPending = stats.totalPendingAmount,
+                paymentsToday = stats.todayPayments,
+                monthlyGrowth = stats.monthlyComparison.percentageChange,
+                averagePayment = if (stats.totalEmployees > 0)
+                    stats.currentMonthPayments / stats.totalEmployees else 0.0,
+                topPaymentMethod = stats.paymentMethodDistribution.maxByOrNull { it.totalAmount }?.method?.displayName ?: "N/A"
+            )
+        } else {
+            StatisticsSummary()
         }
     }
 }

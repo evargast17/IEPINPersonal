@@ -331,3 +331,77 @@ data class FeedbackState(
     val appUsageCount: Int = 0,
     val shouldShowRatingPrompt: Boolean = false
 )
+
+// ============================================================================
+// ESTADOS ESPECÍFICOS PARA ESTADÍSTICAS
+// ============================================================================
+
+// Estados para timeframes de estadísticas
+enum class StatisticsTimeframe(val displayName: String, val days: Int) {
+    WEEK("Esta Semana", 7),
+    MONTH("Este Mes", 30),
+    QUARTER("Este Trimestre", 90),
+    YEAR("Este Año", 365),
+    ALL_TIME("Todo el Tiempo", -1)
+}
+
+// Estados para exportación de datos
+sealed class ExportStatus {
+    object Idle : ExportStatus()
+    object Loading : ExportStatus()
+    data class Success(val message: String) : ExportStatus()
+    data class Error(val message: String) : ExportStatus()
+}
+
+// Estados para criterios de rendimiento de empleados
+enum class PerformanceCriteria {
+    ALL,
+    HIGH_SALARY,
+    RECENT_HIRES,
+    ACTIVE
+}
+
+// Estado para resumen de estadísticas
+data class StatisticsSummary(
+    val totalEmployees: Int = 0,
+    val totalPaymentsThisMonth: Double = 0.0,
+    val totalPending: Double = 0.0,
+    val paymentsToday: Int = 0,
+    val monthlyGrowth: Double = 0.0,
+    val averagePayment: Double = 0.0,
+    val topPaymentMethod: String = "N/A"
+)
+
+// Estados para análisis de estadísticas
+data class StatisticsAnalysisState(
+    val isAnalyzing: Boolean = false,
+    val selectedTimeframe: StatisticsTimeframe = StatisticsTimeframe.MONTH,
+    val selectedEmployee: Employee? = null,
+    val filterCriteria: PerformanceCriteria = PerformanceCriteria.ALL,
+    val analysisResults: List<String> = emptyList(),
+    val errorMessage: String? = null
+)
+
+// Estados para filtros de estadísticas
+data class StatisticsFilterState(
+    val dateRange: Pair<Long, Long>? = null,
+    val employeeIds: Set<String> = emptySet(),
+    val paymentMethods: Set<PaymentMethod> = emptySet(),
+    val minimumAmount: Double? = null,
+    val maximumAmount: Double? = null,
+    val includeDiscounts: Boolean = true,
+    val includeAdvances: Boolean = true
+)
+
+// Estados para comparaciones temporales
+data class TemporalComparisonState(
+    val currentPeriod: StatisticsTimeframe = StatisticsTimeframe.MONTH,
+    val comparisonPeriod: StatisticsTimeframe = StatisticsTimeframe.MONTH,
+    val currentData: DashboardStatistics = DashboardStatistics(),
+    val comparisonData: DashboardStatistics = DashboardStatistics(),
+    val isLoading: Boolean = false,
+    val errorMessage: String? = null
+) {
+    val hasValidComparison: Boolean
+        get() = !isLoading && errorMessage == null
+}
