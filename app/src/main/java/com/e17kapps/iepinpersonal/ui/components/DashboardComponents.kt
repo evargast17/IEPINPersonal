@@ -8,7 +8,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -19,8 +18,6 @@ import com.e17kapps.iepinpersonal.domain.model.ActivityItem
 import com.e17kapps.iepinpersonal.ui.theme.AppColors
 import com.e17kapps.iepinpersonal.utils.formatCurrency
 import com.e17kapps.iepinpersonal.utils.toDateTimeString
-import java.text.NumberFormat
-import java.util.*
 
 @Composable
 fun StatCard(

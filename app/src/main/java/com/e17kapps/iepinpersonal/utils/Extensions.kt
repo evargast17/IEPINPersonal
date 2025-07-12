@@ -523,7 +523,7 @@ class SearchDebouncer(private val delayMs: Long = 300) {
 /**
  * Formatea un monto como moneda peruana
  */
-fun formatCurrency(amount: Double): String {
+fun formatCurrency(amount: Double?): String {
     val peruLocale = java.util.Locale.Builder()
         .setLanguage("es")
         .setRegion("PE")

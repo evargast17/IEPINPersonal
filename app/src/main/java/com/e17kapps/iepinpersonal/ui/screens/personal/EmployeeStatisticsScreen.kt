@@ -13,7 +13,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
@@ -28,6 +27,7 @@ import com.e17kapps.iepinpersonal.ui.theme.AppColors
 import com.e17kapps.iepinpersonal.utils.formatCurrency
 import com.e17kapps.iepinpersonal.utils.toDateString
 import java.util.*
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -758,7 +758,7 @@ private fun RecentActivityCard(stats: EmployeeStatistics) {
 }
 
 @Composable
-private fun ActivityHistoryItem(payment: MonthlyPayment) {
+private fun ActivityHistoryItem(payment: Payment) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -798,7 +798,8 @@ private fun ActivityHistoryItem(payment: MonthlyPayment) {
                 )
 
                 Text(
-                    text = "${getMonthName(payment.month)} ${payment.year}",
+                    //text = "${getMonthName(payment.month)} ${payment.year}",
+                    text = "FALTA CORREGIR AQUI",
                     style = MaterialTheme.typography.bodySmall,
                     color = AppColors.TextSecondary
                 )

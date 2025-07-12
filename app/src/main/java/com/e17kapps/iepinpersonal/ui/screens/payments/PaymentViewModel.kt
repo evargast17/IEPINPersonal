@@ -250,13 +250,11 @@ class PaymentViewModel @Inject constructor(
             employeeId = employee.id,
             employeeName = employee.fullName,
             amount = amount,
-            paymentDate = System.currentTimeMillis(),
             paymentPeriod = paymentPeriod,
             paymentMethod = currentState.paymentMethod,
             bankDetails = currentState.bankDetails,
             digitalWalletDetails = currentState.digitalWalletDetails,
             notes = currentState.notes,
-            status = PaymentStatus.COMPLETED
         )
 
         _uiState.value = currentState.copy(isLoading = true, errorMessage = null)

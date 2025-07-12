@@ -59,11 +59,12 @@ data class EmployeeStatistics(
     val totalPayments: Double = 0.0,
     val totalDiscounts: Double = 0.0,
     val totalAdvances: Double = 0.0,
-    val lastPaymentDate: Long = 0,
+    val lastPaymentDate: Long? = 0,
     val pendingAmount: Double = 0.0,
-    val paymentHistory: List<MonthlyPayment> = emptyList(),
+    val paymentHistory: List<Payment> = emptyList(),
     val advanceHistory: List<Advance> = emptyList(),
-    val discountHistory: List<Discount> = emptyList()
+    val discountHistory: List<Discount> = emptyList(),
+    val averageMonthlyPayment: Double
 )
 
 data class MonthlyPayment(

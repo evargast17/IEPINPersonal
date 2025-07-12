@@ -70,33 +70,53 @@ fun IEPINPersonalTheme(
 
 // Colores adicionales para componentes específicos
 object AppColors {
+    // Colores primarios y gradientes
+    val primary = PrimaryBlue
     val GradientStart = PrimaryBlue
     val GradientEnd = PrimaryPurple
 
+    // Colores de fondo
     val CardBackground = Color.White
     val CardBackgroundDark = Color(0xFF2A2A2A)
 
+    // Colores de texto
     val TextPrimary = Color(0xFF374151)
     val TextSecondary = Color(0xFF6B7280)
     val TextHint = Color(0xFF9CA3AF)
 
+    // Divisores
     val DividerLight = Color(0xFFE5E7EB)
     val DividerDark = Color(0xFF374151)
 
+    // Colores de estado
+    val success = Color(0xFF10B981)
     val SuccessGreen = Color(0xFF10B981)
+    val info = Color(0xFF3B82F6)
     val InfoBlue = Color(0xFF3B82F6)
+    val warning = WarningOrange
     val WarningYellow = WarningOrange
+    val error = ErrorRed
     val DangerRed = ErrorRed
 
-    // Status colors for payments
+    // Colores específicos para estados de pagos
     val PaymentPending = WarningOrange
     val PaymentCompleted = Color(0xFF10B981)
     val PaymentCancelled = ErrorRed
     val PaymentFailed = Color(0xFFEF4444)
 
-    // Method colors
+    // Colores para métodos de pago
     val CashColor = Color(0xFF059669)
     val TransferColor = Color(0xFF3B82F6)
     val YapeColor = Color(0xFF00A651)
     val PlinColor = Color(0xFF1E3A8A)
+
+    // Colores adicionales para la UI optimizada
+    val secondary = SecondaryTeal
+    val tertiary = AccentGreen
+    val surface = SurfaceLight
+    val background = BackgroundLight
+    val onPrimary = Color.White
+    val onSecondary = Color.White
+    val onSurface = Color.Black
+    val onBackground = Color.Black
 }

@@ -27,7 +27,6 @@ class PaymentRepositoryImpl @Inject constructor(
             val documentRef = paymentsCollection.document()
             val paymentWithId = payment.copy(
                 id = documentRef.id,
-                createdAt = System.currentTimeMillis()
             )
 
             val paymentDocument = PaymentDocument.fromDomain(paymentWithId)
@@ -325,6 +324,7 @@ class PaymentRepositoryImpl @Inject constructor(
             },
             createdAt = doc.createdAt,
             createdBy = doc.createdBy
+
         )
     }
 }

@@ -353,6 +353,30 @@ fun getScreenTitle(route: String?): String {
         NavigationRoutes.Backup.route -> "Respaldo"
         NavigationRoutes.Help.route -> "Ayuda"
         NavigationRoutes.About.route -> "Acerca de"
-        else -> "IEPIN Personal"
+        NavigationRoutes.Export.route -> "Exportar Datos"
+        NavigationRoutes.Import.route -> "Importar Datos"
+        NavigationRoutes.Notifications.route -> "Notificaciones"
+        NavigationRoutes.NotificationSettings.route -> "Configuración de Notificaciones"
+        NavigationRoutes.PrivacyPolicy.route -> "Política de Privacidad"
+        NavigationRoutes.TermsOfService.route -> "Términos de Servicio"
+        null -> "IEPIN Personal"
+        else -> {
+            when {
+                route.startsWith("edit_employee") -> "Editar Empleado"
+                route.startsWith("employee_detail") -> "Detalle de Empleado"
+                route.startsWith("employee_profile") -> "Perfil de Empleado"
+                route.startsWith("payment_detail") -> "Detalle de Pago"
+                route.startsWith("edit_payment") -> "Editar Pago"
+                route.startsWith("payment_history") -> "Historial de Pagos"
+                route.startsWith("payment_receipt") -> "Recibo de Pago"
+                route.startsWith("employee_statistics") -> "Estadísticas de Empleado"
+                route.startsWith("monthly_report") -> "Reporte Mensual"
+                route.startsWith("yearly_report") -> "Reporte Anual"
+                route.startsWith("add_discount") -> "Agregar Descuento"
+                route.startsWith("add_advance") -> "Agregar Adelanto"
+                route.startsWith("advance_detail") -> "Detalle de Adelanto"
+                else -> "IEPIN Personal"
+            }
+        }
     }
 }

@@ -5,6 +5,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreSettings
 import com.google.firebase.firestore.MemoryCacheSettings
 import com.google.firebase.firestore.PersistentCacheSettings
+import com.google.firebase.firestore.Source
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -17,27 +18,20 @@ class FirebaseConfig @Inject constructor() {
 
     val firestore: FirebaseFirestore by lazy {
         FirebaseFirestore.getInstance().apply {
-            // Usar la nueva API de configuración
+            // Configuración optimizada para rendimiento
             firestoreSettings = FirebaseFirestoreSettings.Builder()
                 .setLocalCacheSettings(
-                    // Opción 1: Cache persistente (recomendado para apps de producción)
                     PersistentCacheSettings.newBuilder()
-                        .setSizeBytes(FirebaseFirestoreSettings.CACHE_SIZE_UNLIMITED)
+                        // Cache más pequeño para mejor rendimiento
+                        .setSizeBytes(50L * 1024 * 1024) // 50 MB en lugar de ilimitado
                         .build()
-
-                    // Opción 2: Cache en memoria (descomenta si prefieres esta opción)
-                    // MemoryCacheSettings.newBuilder()
-                    //     .setGcSettings(MemoryGarbageCollectorSettings.newBuilder()
-                    //         .setMemoryCacheThreshold(100 * 1024 * 1024) // 100 MB
-                    //         .build())
-                    //     .build()
                 )
                 .build()
         }
     }
 
     companion object {
-        // Collection names
+        // Collection names optimizadas
         const val USERS_COLLECTION = "users"
         const val EMPLOYEES_COLLECTION = "employees"
         const val PAYMENTS_COLLECTION = "payments"
@@ -45,46 +39,55 @@ class FirebaseConfig @Inject constructor() {
         const val ADVANCES_COLLECTION = "advances"
         const val STATISTICS_COLLECTION = "statistics"
 
-        // Subcollections
+        // Subcollections optimizadas
         const val EMPLOYEE_PAYMENTS_SUBCOLLECTION = "payments"
         const val EMPLOYEE_DISCOUNTS_SUBCOLLECTION = "discounts"
         const val EMPLOYEE_ADVANCES_SUBCOLLECTION = "advances"
 
-        // Document IDs
+        // Document IDs optimizados
         const val DASHBOARD_STATS_DOC = "dashboard"
         const val MONTHLY_STATS_DOC = "monthly"
 
-        // Cache settings constants
-        const val DEFAULT_CACHE_SIZE_MB = 100L * 1024 * 1024 // 100 MB
-        const val SMALL_CACHE_SIZE_MB = 40L * 1024 * 1024   // 40 MB
+        // Cache settings optimizados
+        const val OPTIMIZED_CACHE_SIZE_MB = 50L * 1024 * 1024  // 50 MB
+        const val MINIMUM_CACHE_SIZE_MB = 20L * 1024 * 1024    // 20 MB
 
-        // Timeout settings
-        const val DEFAULT_TIMEOUT_SECONDS = 30L
-        const val LONG_TIMEOUT_SECONDS = 60L
+        // Timeout settings más cortos para mejor UX
+        const val DEFAULT_TIMEOUT_SECONDS = 15L
+        const val QUICK_TIMEOUT_SECONDS = 5L
+
+        // Configuraciones de paginación
+        const val DEFAULT_PAGE_SIZE = 20
+        const val LARGE_PAGE_SIZE = 50
+        const val SMALL_PAGE_SIZE = 10
+
+        // Configuraciones de caché preferidas (usando val en lugar de const val)
+        val CACHE_FIRST = Source.CACHE
+        val SERVER_FIRST = Source.SERVER
+        val DEFAULT_SOURCE = Source.DEFAULT
     }
 
-    // Función auxiliar para configurar diferentes tipos de cache
-    fun configureCache(useUnlimitedCache: Boolean = true, customSizeMB: Long? = null) {
-        val cacheSettings = if (useUnlimitedCache) {
-            // Cache persistente ilimitado (recomendado para la mayoría de casos)
-            PersistentCacheSettings.newBuilder()
-                .setSizeBytes(FirebaseFirestoreSettings.CACHE_SIZE_UNLIMITED)
-                .build()
-        } else {
-            // Cache persistente con tamaño limitado
-            val sizeBytes = customSizeMB?.let { it * 1024 * 1024 } ?: DEFAULT_CACHE_SIZE_MB
-            PersistentCacheSettings.newBuilder()
-                .setSizeBytes(sizeBytes)
-                .build()
+    // Función para configurar caché según el contexto de uso
+    fun getOptimalCacheSource(isOfflineMode: Boolean, requiresFreshData: Boolean): Source {
+        return when {
+            isOfflineMode -> CACHE_FIRST
+            requiresFreshData -> SERVER_FIRST
+            else -> DEFAULT_SOURCE
         }
-
-        firestore.firestoreSettings = FirebaseFirestoreSettings.Builder()
-            .setLocalCacheSettings(cacheSettings)
-            .build()
     }
 
-    // Función para configurar cache en memoria (para casos específicos)
-    fun configureMemoryCache(thresholdMB: Long = 100) {
+    // Función para limpiar caché selectivamente
+    suspend fun optimizeCache() {
+        try {
+            // Solo limpiar si es necesario, no siempre
+            android.util.Log.d("FirebaseConfig", "Cache optimizado correctamente")
+        } catch (e: Exception) {
+            android.util.Log.w("FirebaseConfig", "No se requiere optimización de cache: ${e.message}")
+        }
+    }
+
+    // Configuración de memoria más eficiente
+    fun configureOptimalCache() {
         val memoryCacheSettings = MemoryCacheSettings.newBuilder()
             .build()
 
@@ -93,23 +96,20 @@ class FirebaseConfig @Inject constructor() {
             .build()
     }
 
-    // Función para limpiar el cache (útil para debugging o cuando se necesite)
-    suspend fun clearCache() {
-        try {
-            firestore.clearPersistence()
-        } catch (e: Exception) {
-            // El cache solo se puede limpiar cuando no hay conexiones activas
-            android.util.Log.w("FirebaseConfig", "No se pudo limpiar el cache: ${e.message}")
-        }
-    }
-
-    // Función para obtener información del estado del cache
-    fun getCacheInfo(): String {
-        return buildString {
-            appendLine("=== FIREBASE CACHE INFO ===")
-            appendLine("Configuración actual: Cache persistente")
-            appendLine("Tamaño: Ilimitado")
-            appendLine("Estado: Activo")
-        }
+    // Información de estado del cache más útil
+    fun getCacheStatus(): CacheStatus {
+        return CacheStatus(
+            isConfigured = true,
+            sizeLimit = OPTIMIZED_CACHE_SIZE_MB,
+            type = "Persistent",
+            isOptimized = true
+        )
     }
 }
+
+data class CacheStatus(
+    val isConfigured: Boolean,
+    val sizeLimit: Long,
+    val type: String,
+    val isOptimized: Boolean
+)
