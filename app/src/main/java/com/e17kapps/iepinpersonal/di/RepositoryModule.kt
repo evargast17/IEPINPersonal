@@ -1,10 +1,12 @@
 package com.e17kapps.iepinpersonal.di
 
 import com.e17kapps.iepinpersonal.data.repository.AuthRepositoryImpl
+import com.e17kapps.iepinpersonal.data.repository.DiscountRepositoryImpl
 import com.e17kapps.iepinpersonal.data.repository.EmployeeRepositoryImpl
 import com.e17kapps.iepinpersonal.data.repository.PaymentRepositoryImpl
 import com.e17kapps.iepinpersonal.data.repository.StatisticsRepositoryImpl
 import com.e17kapps.iepinpersonal.domain.repository.AuthRepository
+import com.e17kapps.iepinpersonal.domain.repository.DiscountRepository
 import com.e17kapps.iepinpersonal.domain.repository.EmployeeRepository
 import com.e17kapps.iepinpersonal.domain.repository.PaymentRepository
 import com.e17kapps.iepinpersonal.domain.repository.StatisticsRepository
@@ -41,4 +43,10 @@ abstract class RepositoryModule {
     abstract fun bindStatisticsRepository(
         statisticsRepositoryImpl: StatisticsRepositoryImpl
     ): StatisticsRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindDiscountRepository(
+        discountRepositoryImpl: DiscountRepositoryImpl
+    ): DiscountRepository
 }

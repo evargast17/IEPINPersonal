@@ -91,6 +91,13 @@ sealed class NavigationRoutes(val route: String) {
     object AddDiscount : NavigationRoutes("add_discount/{employeeId}") {
         fun createRoute(employeeId: String) = "add_discount/$employeeId"
     }
+    object DiscountDetail : NavigationRoutes("discount_detail/{discountId}") {
+        fun createRoute(discountId: String) = "discount_detail/$discountId"
+    }
+    object EditDiscount : NavigationRoutes("edit_discount/{discountId}") {
+        fun createRoute(discountId: String) = "edit_discount/$discountId"
+    }
+
 
     object Advances : NavigationRoutes("advances")
     object AddAdvance : NavigationRoutes("add_advance/{employeeId}") {

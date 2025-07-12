@@ -19,6 +19,8 @@ import com.e17kapps.iepinpersonal.ui.screens.auth.AuthViewModel
 import com.e17kapps.iepinpersonal.ui.screens.auth.LoginScreen
 import com.e17kapps.iepinpersonal.ui.screens.auth.RegisterScreen
 import com.e17kapps.iepinpersonal.ui.screens.auth.SplashScreen
+import com.e17kapps.iepinpersonal.ui.screens.discounts.AddDiscountScreen
+import com.e17kapps.iepinpersonal.ui.screens.discounts.DiscountScreen
 import com.e17kapps.iepinpersonal.ui.screens.main.MainScreen
 import com.e17kapps.iepinpersonal.ui.screens.payments.PaymentDetailScreen
 
@@ -314,15 +316,54 @@ fun MainAppNavigation(
         }
 
         // NUEVAS RUTAS OPTIMIZADAS para Descuentos y Adelantos
+        // Discount Routes
         composable(NavigationRoutes.Discounts.route) {
-            PlaceholderScreen(
-                title = "Gestión de Descuentos",
-                icon = "📉",
+            DiscountScreen(
+                onNavigateToAddDiscount = { employeeId ->
+                    val route = if (employeeId.isNotBlank()) {
+                        NavigationRoutes.AddDiscount.createRoute(employeeId)
+                    } else {
+                        NavigationRoutes.AddDiscount.createRoute("") // Sin empleado predeterminado
+                    }
+                    navController.navigate(route) {
+                        launchSingleTop = true
+                    }
+                },
+                onNavigateToDiscountDetail = { discountId ->
+                    navController.navigate(NavigationRoutes.DiscountDetail.createRoute(discountId)) {
+                        launchSingleTop = true
+                    }
+                }
+            )
+        }
+
+        composable(NavigationRoutes.AddDiscount.route) { backStackEntry ->
+            val employeeId = backStackEntry.arguments?.getString("employeeId") ?: ""
+            AddDiscountScreen(
+                employeeId = employeeId,
                 onNavigateBack = {
+                    navController.popBackStack()
+                },
+                onDiscountAdded = {
                     navController.popBackStack()
                 }
             )
         }
+
+        /* TODO: Implementar DiscountDetailScreen y EditDiscountScreen
+        composable(NavigationRoutes.DiscountDetail.route) { backStackEntry ->
+            val discountId = backStackEntry.arguments?.getString("discountId") ?: ""
+            DiscountDetailScreen(
+                discountId = discountId,
+                onNavigateBack = {
+                    navController.popBackStack()
+                },
+                onNavigateToEdit = {
+                    navController.navigate(NavigationRoutes.EditDiscount.createRoute(discountId))
+                }
+            )
+        }
+        */
 
         composable(NavigationRoutes.Advances.route) {
             PlaceholderScreen(
