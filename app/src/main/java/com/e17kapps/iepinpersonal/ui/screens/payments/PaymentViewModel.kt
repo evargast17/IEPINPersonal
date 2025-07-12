@@ -495,4 +495,68 @@ class PaymentViewModel @Inject constructor(
         loadEmployeesJob?.cancel()
         loadPaymentsJob?.cancel()
     }
+
+    fun getPaymentById(paymentId: String) {
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(isLoading = true, errorMessage = null)
+
+            try {
+                paymentRepository.getPayment(paymentId)
+                    .onSuccess { payment ->
+                        _selectedPayment.value = payment
+                        _uiState.value = _uiState.value.copy(isLoading = false)
+                    }
+                    .onFailure { exception ->
+                        _selectedPayment.value = null
+                        _uiState.value = _uiState.value.copy(
+                            isLoading = false,
+                            errorMessage = "Error al cargar el pago: ${exception.message}"
+                        )
+                    }
+            } catch (e: Exception) {
+                if (e !is kotlinx.coroutines.CancellationException) {
+                    _selectedPayment.value = null
+                    _uiState.value = _uiState.value.copy(
+                        isLoading = false,
+                        errorMessage = "Error inesperado: ${e.message}"
+                    )
+                }
+            }
+        }
+    }
+
+    fun deletePayment(paymentId: String) {
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(isLoading = true, errorMessage = null)
+
+            try {
+                paymentRepository.deletePayment(paymentId)
+                    .onSuccess {
+                        _uiState.value = _uiState.value.copy(
+                            isLoading = false,
+                            successMessage = "Pago eliminado exitosamente"
+                        )
+                    }
+                    .onFailure { exception ->
+                        _uiState.value = _uiState.value.copy(
+                            isLoading = false,
+                            errorMessage = "Error al eliminar el pago: ${exception.message}"
+                        )
+                    }
+            } catch (e: Exception) {
+                if (e !is kotlinx.coroutines.CancellationException) {
+                    _uiState.value = _uiState.value.copy(
+                        isLoading = false,
+                        errorMessage = "Error inesperado: ${e.message}"
+                    )
+                }
+            }
+        }
+    }
+
+    fun clearSelectedPayment() {
+        _selectedPayment.value = null
+    }
+
+
 }

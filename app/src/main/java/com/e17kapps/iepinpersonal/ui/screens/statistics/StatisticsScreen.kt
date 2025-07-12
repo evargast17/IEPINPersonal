@@ -287,7 +287,7 @@ private fun StatisticsContent(
                         title = "Total Empleados",
                         value = statistics.totalEmployees.toString(),
                         icon = "👥",
-                        color = AppColors.InfoBlue,
+                        color = AppColors.info,
                         change = null
                     )
                 }
@@ -297,7 +297,7 @@ private fun StatisticsContent(
                         title = "Pagos del Mes",
                         value = formatCurrency(statistics.currentMonthPayments),
                         icon = "💰",
-                        color = AppColors.SuccessGreen,
+                        color = AppColors.success,
                         change = statistics.monthlyComparison.percentageChange
                     )
                 }
@@ -307,7 +307,7 @@ private fun StatisticsContent(
                         title = "Pendiente",
                         value = formatCurrency(statistics.totalPendingAmount),
                         icon = "⏳",
-                        color = AppColors.WarningYellow,
+                        color = AppColors.warning,
                         change = null
                     )
                 }
@@ -317,7 +317,7 @@ private fun StatisticsContent(
                         title = "Pagos Hoy",
                         value = statistics.todayPayments.toString(),
                         icon = "✅",
-                        color = AppColors.SuccessGreen,
+                        color = AppColors.success,
                         change = null
                     )
                 }

@@ -250,7 +250,7 @@ fun ActivityItemCard(
                         style = MaterialTheme.typography.bodyMedium.copy(
                             fontWeight = FontWeight.SemiBold
                         ),
-                        color = Color(0xFF10B981) // SuccessGreen
+                        color = AppColors.success
                     )
                 }
             }
@@ -260,12 +260,12 @@ fun ActivityItemCard(
 
 private fun getActivityColor(type: com.e17kapps.iepinpersonal.domain.model.ActivityType): Color {
     return when (type) {
-        com.e17kapps.iepinpersonal.domain.model.ActivityType.PAYMENT -> Color(0xFF10B981) // SuccessGreen
-        com.e17kapps.iepinpersonal.domain.model.ActivityType.EMPLOYEE_ADDED -> Color(0xFF3B82F6) // InfoBlue
+        com.e17kapps.iepinpersonal.domain.model.ActivityType.PAYMENT -> Color(0xFF10B981) // success
+        com.e17kapps.iepinpersonal.domain.model.ActivityType.EMPLOYEE_ADDED -> Color(0xFF3B82F6) // info
         com.e17kapps.iepinpersonal.domain.model.ActivityType.DISCOUNT_APPLIED -> Color(0xFFFECA57) // WarningOrange
         com.e17kapps.iepinpersonal.domain.model.ActivityType.ADVANCE_REQUESTED -> Color(0xFF4ECDC4) // SecondaryTeal
-        com.e17kapps.iepinpersonal.domain.model.ActivityType.ADVANCE_APPROVED -> Color(0xFF10B981) // SuccessGreen
-        com.e17kapps.iepinpersonal.domain.model.ActivityType.EMPLOYEE_UPDATED -> Color(0xFF3B82F6) // InfoBlue
+        com.e17kapps.iepinpersonal.domain.model.ActivityType.ADVANCE_APPROVED -> Color(0xFF10B981) // success
+        com.e17kapps.iepinpersonal.domain.model.ActivityType.EMPLOYEE_UPDATED -> Color(0xFF3B82F6) // info
     }
 }
 

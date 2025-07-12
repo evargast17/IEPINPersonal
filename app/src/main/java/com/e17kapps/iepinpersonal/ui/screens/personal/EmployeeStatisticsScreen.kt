@@ -8,6 +8,11 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.InsertDriveFile
+import androidx.compose.material.icons.automirrored.filled.TrendingDown
+import androidx.compose.material.icons.automirrored.filled.TrendingFlat
+import androidx.compose.material.icons.automirrored.filled.TrendingUp
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -76,7 +81,7 @@ fun EmployeeStatisticsScreen(
             navigationIcon = {
                 IconButton(onClick = onNavigateBack) {
                     Icon(
-                        imageVector = Icons.Default.ArrowBack,
+                        imageVector = Icons.AutoMirrored.Default.ArrowBack,
                         contentDescription = "Regresar"
                     )
                 }
@@ -286,7 +291,7 @@ private fun EmployeeStatsHeader(employee: Employee) {
                         imageVector = Icons.Default.AttachMoney,
                         contentDescription = null,
                         modifier = Modifier.size(16.dp),
-                        tint = AppColors.SuccessGreen
+                        tint = AppColors.success
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
@@ -294,7 +299,7 @@ private fun EmployeeStatsHeader(employee: Employee) {
                         style = MaterialTheme.typography.bodyMedium.copy(
                             fontWeight = FontWeight.SemiBold
                         ),
-                        color = AppColors.SuccessGreen
+                        color = AppColors.success
                     )
                 }
             }
@@ -409,14 +414,14 @@ private fun MainStatisticsCard(
                         title = "Total Pagado",
                         value = formatCurrency(stats.totalPayments),
                         icon = Icons.Default.AttachMoney,
-                        color = AppColors.SuccessGreen
+                        color = AppColors.success
                     )
 
                     StatisticItem(
                         title = "Número de Pagos",
                         value = stats.paymentHistory.size.toString(),
                         icon = Icons.Default.Receipt,
-                        color = AppColors.InfoBlue
+                        color = AppColors.info
                     )
                 }
 
@@ -427,22 +432,22 @@ private fun MainStatisticsCard(
                     StatisticItem(
                         title = "Total Descuentos",
                         value = formatCurrency(stats.totalDiscounts),
-                        icon = Icons.Default.TrendingDown,
-                        color = AppColors.DangerRed
+                        icon = Icons.AutoMirrored.Filled.TrendingDown,
+                        color = AppColors.error
                     )
 
                     StatisticItem(
                         title = "Total Adelantos",
                         value = formatCurrency(stats.totalAdvances),
                         icon = Icons.Default.CreditCard,
-                        color = AppColors.WarningYellow
+                        color = AppColors.warning
                     )
                 }
 
                 if (stats.pendingAmount > 0) {
                     Card(
                         colors = CardDefaults.cardColors(
-                            containerColor = AppColors.WarningYellow.copy(alpha = 0.1f)
+                            containerColor = AppColors.warning.copy(alpha = 0.1f)
                         )
                     ) {
                         Row(
@@ -458,7 +463,7 @@ private fun MainStatisticsCard(
                                 Icon(
                                     imageVector = Icons.Default.Warning,
                                     contentDescription = null,
-                                    tint = AppColors.WarningYellow,
+                                    tint = AppColors.warning,
                                     modifier = Modifier.size(20.dp)
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
@@ -467,7 +472,7 @@ private fun MainStatisticsCard(
                                     style = MaterialTheme.typography.bodyMedium.copy(
                                         fontWeight = FontWeight.Medium
                                     ),
-                                    color = AppColors.WarningYellow
+                                    color = AppColors.warning
                                 )
                             }
 
@@ -476,7 +481,7 @@ private fun MainStatisticsCard(
                                 style = MaterialTheme.typography.titleMedium.copy(
                                     fontWeight = FontWeight.Bold
                                 ),
-                                color = AppColors.WarningYellow
+                                color = AppColors.warning
                             )
                         }
                     }
@@ -561,9 +566,9 @@ private fun PaymentTrendCard(
                 )
 
                 Icon(
-                    imageVector = Icons.Default.TrendingUp,
+                    imageVector = Icons.AutoMirrored.Filled.TrendingUp,
                     contentDescription = null,
-                    tint = AppColors.SuccessGreen
+                    tint = AppColors.success
                 )
             }
 
@@ -670,25 +675,25 @@ private fun ComparisonItem(
             when (isPositive) {
                 true -> {
                     Icon(
-                        imageVector = Icons.Default.TrendingUp,
+                        imageVector = Icons.AutoMirrored.Filled.TrendingUp,
                         contentDescription = null,
-                        tint = AppColors.SuccessGreen,
+                        tint = AppColors.success,
                         modifier = Modifier.size(16.dp)
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                 }
                 false -> {
                     Icon(
-                        imageVector = Icons.Default.TrendingDown,
+                        imageVector = Icons.AutoMirrored.Filled.TrendingDown,
                         contentDescription = null,
-                        tint = AppColors.DangerRed,
+                        tint = AppColors.error,
                         modifier = Modifier.size(16.dp)
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                 }
                 null -> {
                     Icon(
-                        imageVector = Icons.Default.TrendingFlat,
+                        imageVector = Icons.AutoMirrored.Filled.TrendingFlat,
                         contentDescription = null,
                         tint = AppColors.TextSecondary,
                         modifier = Modifier.size(16.dp)
@@ -703,8 +708,8 @@ private fun ComparisonItem(
                     fontWeight = FontWeight.SemiBold
                 ),
                 color = when (isPositive) {
-                    true -> AppColors.SuccessGreen
-                    false -> AppColors.DangerRed
+                    true -> AppColors.success
+                    false -> AppColors.error
                     null -> AppColors.TextSecondary
                 }
             )
@@ -835,7 +840,7 @@ private fun InsightsCard(
                 Icon(
                     imageVector = Icons.Default.Lightbulb,
                     contentDescription = null,
-                    tint = AppColors.WarningYellow,
+                    tint = AppColors.warning,
                     modifier = Modifier.size(20.dp)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
@@ -905,7 +910,7 @@ private fun ErrorCard(message: String) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
-            containerColor = AppColors.DangerRed.copy(alpha = 0.1f)
+            containerColor = AppColors.error.copy(alpha = 0.1f)
         )
     ) {
         Row(
@@ -915,13 +920,13 @@ private fun ErrorCard(message: String) {
             Icon(
                 imageVector = Icons.Default.Error,
                 contentDescription = null,
-                tint = AppColors.DangerRed
+                tint = AppColors.error
             )
             Spacer(modifier = Modifier.width(12.dp))
             Text(
                 text = message,
                 style = MaterialTheme.typography.bodyMedium,
-                color = AppColors.DangerRed
+                color = AppColors.error
             )
         }
     }
@@ -1042,7 +1047,7 @@ private enum class ExportFormat(
 ) {
     PDF("Reporte PDF", Icons.Default.PictureAsPdf),
     EXCEL("Hoja de Excel", Icons.Default.TableChart),
-    CSV("Datos CSV", Icons.Default.InsertDriveFile)
+    CSV("Datos CSV", Icons.AutoMirrored.Filled.InsertDriveFile)
 }
 
 private data class EmployeeInsight(
@@ -1055,10 +1060,10 @@ private enum class InsightType(
     val icon: String,
     val color: Color
 ) {
-    POSITIVE("✅", AppColors.SuccessGreen),
-    WARNING("⚠️", AppColors.WarningYellow),
-    INFO("ℹ️", AppColors.InfoBlue),
-    CRITICAL("🚨", AppColors.DangerRed)
+    POSITIVE("✅", AppColors.success),
+    WARNING("⚠️", AppColors.warning),
+    INFO("ℹ️", AppColors.info),
+    CRITICAL("🚨", AppColors.error)
 }
 
 // Funciones auxiliares
@@ -1157,10 +1162,10 @@ private fun calculateEmployeeAntiquity(startDate: Long): String {
 
 private fun getStatusColor(status: PaymentStatus): Color {
     return when (status) {
-        PaymentStatus.COMPLETED -> AppColors.SuccessGreen
-        PaymentStatus.PENDING -> AppColors.WarningYellow
+        PaymentStatus.COMPLETED -> AppColors.success
+        PaymentStatus.PENDING -> AppColors.warning
         PaymentStatus.CANCELLED -> AppColors.TextSecondary
-        PaymentStatus.FAILED -> AppColors.DangerRed
+        PaymentStatus.FAILED -> AppColors.error
     }
 }
 
@@ -1185,8 +1190,8 @@ private fun getMonthName(month: Int): String {
 private fun StatusChip(isActive: Boolean) {
     val (backgroundColor, textColor, text, icon) = if (isActive) {
         listOf(
-            AppColors.SuccessGreen.copy(alpha = 0.1f),
-            AppColors.SuccessGreen,
+            AppColors.success.copy(alpha = 0.1f),
+            AppColors.success,
             "Activo",
             "✅"
         )

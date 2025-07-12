@@ -10,6 +10,9 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ExitToApp
+import androidx.compose.material.icons.automirrored.filled.Help
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -229,7 +232,7 @@ private fun ProfileOptions(
             )
 
             ProfileOptionItem(
-                icon = Icons.Default.Help,
+                icon = Icons.AutoMirrored.Filled.Help,
                 title = "Ayuda y Soporte",
                 description = "Centro de ayuda y contacto",
                 onClick = { /* TODO: Implementar ayuda */ }
@@ -248,11 +251,11 @@ private fun ProfileOptions(
             )
 
             ProfileOptionItem(
-                icon = Icons.Default.ExitToApp,
+                icon = Icons.AutoMirrored.Filled.ExitToApp,
                 title = "Cerrar Sesión",
                 description = "Salir de la aplicación",
                 onClick = onLogout,
-                textColor = AppColors.DangerRed
+                textColor = AppColors.error
             )
         }
     }
@@ -300,7 +303,7 @@ private fun ProfileOptionItem(
         }
 
         Icon(
-            imageVector = Icons.Default.KeyboardArrowRight,
+            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
             contentDescription = null,
             tint = AppColors.TextSecondary,
             modifier = Modifier.size(20.dp)
@@ -445,9 +448,9 @@ private fun LogoutConfirmationDialog(
         onDismissRequest = onDismiss,
         icon = {
             Icon(
-                imageVector = Icons.Default.ExitToApp,
+                imageVector = Icons.AutoMirrored.Filled.ExitToApp,
                 contentDescription = null,
-                tint = AppColors.DangerRed,
+                tint = AppColors.error,
                 modifier = Modifier.size(32.dp)
             )
         },

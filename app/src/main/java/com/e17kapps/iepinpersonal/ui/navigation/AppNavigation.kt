@@ -20,6 +20,7 @@ import com.e17kapps.iepinpersonal.ui.screens.auth.LoginScreen
 import com.e17kapps.iepinpersonal.ui.screens.auth.RegisterScreen
 import com.e17kapps.iepinpersonal.ui.screens.auth.SplashScreen
 import com.e17kapps.iepinpersonal.ui.screens.main.MainScreen
+import com.e17kapps.iepinpersonal.ui.screens.payments.PaymentDetailScreen
 
 @Composable
 fun AppNavigation() {
@@ -233,6 +234,12 @@ fun MainAppNavigation(
                 paymentId = paymentId,
                 onNavigateBack = {
                     navController.popBackStack()
+                },
+                onNavigateToEdit = {
+                    navController.navigate(NavigationRoutes.EditPayment.createRoute(paymentId))
+                },
+                onNavigateToEmployee = { employeeId ->
+                    navController.navigate(NavigationRoutes.EmployeeDetail.createRoute(employeeId))
                 }
             )
         }

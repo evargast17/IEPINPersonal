@@ -5,8 +5,11 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.TrendingUp
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -61,7 +64,7 @@ fun MonthlyReportScreen(
             navigationIcon = {
                 IconButton(onClick = onNavigateBack) {
                     Icon(
-                        imageVector = Icons.Default.ArrowBack,
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = "Regresar"
                     )
                 }
@@ -278,7 +281,7 @@ private fun MonthlyReportContent(
                     title = "Total Pagos",
                     value = formatCurrency(stats.totalPayments),
                     icon = "💰",
-                    color = AppColors.SuccessGreen,
+                    color = AppColors.success,
                     change = null,
                     modifier = Modifier.weight(1f)
                 )
@@ -287,7 +290,7 @@ private fun MonthlyReportContent(
                     title = "Número de Pagos",
                     value = stats.paymentCount.toString(),
                     icon = "📊",
-                    color = AppColors.InfoBlue,
+                    color = AppColors.info,
                     change = null,
                     modifier = Modifier.weight(1f)
                 )
@@ -303,7 +306,7 @@ private fun MonthlyReportContent(
                     title = "Total Descuentos",
                     value = formatCurrency(stats.totalDiscounts),
                     icon = "📉",
-                    color = AppColors.WarningYellow,
+                    color = AppColors.warning,
                     change = null,
                     modifier = Modifier.weight(1f)
                 )
@@ -312,7 +315,7 @@ private fun MonthlyReportContent(
                     title = "Total Adelantos",
                     value = formatCurrency(stats.totalAdvances),
                     icon = "💳",
-                    color = AppColors.InfoBlue,
+                    color = AppColors.info,
                     change = null,
                     modifier = Modifier.weight(1f)
                 )
@@ -434,7 +437,7 @@ private fun AveragePaymentCard(
                         style = MaterialTheme.typography.headlineMedium.copy(
                             fontWeight = FontWeight.Bold
                         ),
-                        color = AppColors.SuccessGreen
+                        color = AppColors.success
                     )
 
                     Text(
@@ -445,9 +448,9 @@ private fun AveragePaymentCard(
                 }
 
                 Icon(
-                    imageVector = Icons.Default.TrendingUp,
+                    imageVector = Icons.AutoMirrored.Filled.TrendingUp,
                     contentDescription = null,
-                    tint = AppColors.SuccessGreen,
+                    tint = AppColors.success,
                     modifier = Modifier.size(32.dp)
                 )
             }
@@ -501,9 +504,9 @@ private fun TimeAnalysisCard(
                 )
             }
 
-            Divider(
+            HorizontalDivider(
                 modifier = Modifier.padding(vertical = 12.dp),
-                color = AppColors.DividerLight
+                thickness = DividerDefaults.Thickness, color = AppColors.DividerLight
             )
 
             // Promedios
@@ -605,9 +608,9 @@ private fun RecommendationItem(
             },
             contentDescription = null,
             tint = when (type) {
-                RecommendationType.INFO -> AppColors.InfoBlue
-                RecommendationType.WARNING -> AppColors.WarningYellow
-                RecommendationType.SUCCESS -> AppColors.SuccessGreen
+                RecommendationType.INFO -> AppColors.info
+                RecommendationType.WARNING -> AppColors.warning
+                RecommendationType.SUCCESS -> AppColors.success
             },
             modifier = Modifier.size(16.dp)
         )

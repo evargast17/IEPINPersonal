@@ -184,7 +184,7 @@ fun EmployeeCard(
                     style = MaterialTheme.typography.titleSmall.copy(
                         fontWeight = FontWeight.SemiBold
                     ),
-                    color = Color(0xFF10B981) // SuccessGreen
+                    color = Color(0xFF10B981) // success
                 )
 
                 Box {

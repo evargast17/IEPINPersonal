@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.*
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -300,15 +301,15 @@ fun MonthlyComparisonCard(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     val changeColor = when {
-                        comparison.percentageChange > 0 -> AppColors.SuccessGreen
-                        comparison.percentageChange < 0 -> AppColors.DangerRed
+                        comparison.percentageChange > 0 -> AppColors.success
+                        comparison.percentageChange < 0 -> AppColors.error
                         else -> AppColors.TextSecondary
                     }
 
                     val changeIcon = when {
-                        comparison.percentageChange > 0 -> Icons.Default.TrendingUp
-                        comparison.percentageChange < 0 -> Icons.Default.TrendingDown
-                        else -> Icons.Default.TrendingFlat
+                        comparison.percentageChange > 0 -> Icons.AutoMirrored.Filled.TrendingUp
+                        comparison.percentageChange < 0 -> Icons.AutoMirrored.Filled.TrendingDown
+                        else -> Icons.AutoMirrored.Filled.TrendingFlat
                     }
 
                     Icon(
@@ -455,7 +456,7 @@ fun EmployeeStatCard(
                 modifier = Modifier
                     .size(8.dp)
                     .background(
-                        color = if (employee.isActive) AppColors.SuccessGreen else AppColors.DangerRed,
+                        color = if (employee.isActive) AppColors.success else AppColors.error,
                         shape = CircleShape
                     )
             )
@@ -549,7 +550,7 @@ fun ActivityCard(
                         style = MaterialTheme.typography.bodyMedium.copy(
                             fontWeight = FontWeight.SemiBold
                         ),
-                        color = AppColors.SuccessGreen
+                        color = AppColors.success
                     )
                 }
             }
@@ -687,18 +688,18 @@ private fun getPaymentMethodColor(method: PaymentMethod): Color {
         PaymentMethod.BANK_TRANSFER -> AppColors.TransferColor
         PaymentMethod.YAPE -> AppColors.YapeColor
         PaymentMethod.PLIN -> AppColors.PlinColor
-        PaymentMethod.OTHER_DIGITAL -> AppColors.InfoBlue
+        PaymentMethod.OTHER_DIGITAL -> AppColors.info
     }
 }
 
 private fun getActivityColor(type: ActivityType): Color {
     return when (type) {
-        ActivityType.PAYMENT -> AppColors.SuccessGreen
-        ActivityType.EMPLOYEE_ADDED -> AppColors.InfoBlue
-        ActivityType.DISCOUNT_APPLIED -> AppColors.WarningYellow
-        ActivityType.ADVANCE_REQUESTED -> AppColors.InfoBlue
-        ActivityType.ADVANCE_APPROVED -> AppColors.SuccessGreen
-        ActivityType.EMPLOYEE_UPDATED -> AppColors.InfoBlue
+        ActivityType.PAYMENT -> AppColors.success
+        ActivityType.EMPLOYEE_ADDED -> AppColors.info
+        ActivityType.DISCOUNT_APPLIED -> AppColors.warning
+        ActivityType.ADVANCE_REQUESTED -> AppColors.info
+        ActivityType.ADVANCE_APPROVED -> AppColors.success
+        ActivityType.EMPLOYEE_UPDATED -> AppColors.info
     }
 }
 

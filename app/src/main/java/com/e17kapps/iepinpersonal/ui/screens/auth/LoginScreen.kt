@@ -1,5 +1,6 @@
 package com.e17kapps.iepinpersonal.ui.screens.auth
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -121,7 +122,7 @@ fun LoginScreen(
                     modifier = Modifier
                         .size(80.dp)
                         .background(
-                            color = MaterialTheme.colorScheme.surface.copy(alpha = 0.2f),
+                            color = AppColors.surface.copy(alpha = 0.2f),
                             shape = MaterialTheme.shapes.large
                         ),
                     contentAlignment = Alignment.Center
@@ -139,13 +140,13 @@ fun LoginScreen(
                     style = MaterialTheme.typography.headlineLarge.copy(
                         fontWeight = FontWeight.Bold
                     ),
-                    color = MaterialTheme.colorScheme.onPrimary
+                    color = AppColors.onPrimary
                 )
 
                 Text(
                     text = "Bienvenido de nuevo",
                     style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f)
+                    color = AppColors.onPrimary.copy(alpha = 0.8f)
                 )
             }
 
@@ -155,7 +156,7 @@ fun LoginScreen(
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(16.dp)),
                 colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surface
+                    containerColor = AppColors.surface
                 ),
                 elevation = CardDefaults.cardElevation(
                     defaultElevation = 8.dp
@@ -201,7 +202,7 @@ fun LoginScreen(
                             if (!isEmailValid && uiState.email.isNotBlank()) {
                                 Text(
                                     text = "Ingresa un email válido",
-                                    color = MaterialTheme.colorScheme.error
+                                    color = AppColors.error
                                 )
                             }
                         }
@@ -261,7 +262,7 @@ fun LoginScreen(
                             if (!isPasswordValid && uiState.password.isNotBlank()) {
                                 Text(
                                     text = "La contraseña debe tener al menos 6 caracteres",
-                                    color = MaterialTheme.colorScheme.error
+                                    color = AppColors.error
                                 )
                             }
                         }
@@ -272,7 +273,7 @@ fun LoginScreen(
                         Card(
                             modifier = Modifier.fillMaxWidth(),
                             colors = CardDefaults.cardColors(
-                                containerColor = MaterialTheme.colorScheme.errorContainer
+                                containerColor = AppColors.error
                             )
                         ) {
                             Row(
@@ -287,7 +288,7 @@ fun LoginScreen(
                                 Text(
                                     text = uiState.errorMessage!!,
                                     style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onErrorContainer
+                                    color = AppColors.error
                                 )
                             }
                         }
@@ -382,7 +383,8 @@ fun LoginScreen(
                     OutlinedButton(
                         onClick = onNavigateToRegister,
                         modifier = Modifier.fillMaxWidth(),
-                        border = ButtonDefaults.outlinedButtonBorder.copy(
+                        border = BorderStroke(
+                            width = 1.dp,
                             brush = Brush.horizontalGradient(
                                 colors = listOf(
                                     AppColors.GradientStart,

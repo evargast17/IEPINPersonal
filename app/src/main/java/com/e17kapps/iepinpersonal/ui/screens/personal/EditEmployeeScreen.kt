@@ -6,6 +6,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
@@ -71,7 +72,7 @@ fun EditEmployeeScreen(
             ) {
                 IconButton(onClick = onNavigateBack) {
                     Icon(
-                        imageVector = Icons.Default.ArrowBack,
+                        imageVector = Icons.AutoMirrored.Default.ArrowBack,
                         contentDescription = "Regresar"
                     )
                 }
@@ -89,7 +90,7 @@ fun EditEmployeeScreen(
             IconButton(
                 onClick = { showDeleteDialog = true },
                 colors = IconButtonDefaults.iconButtonColors(
-                    contentColor = AppColors.DangerRed
+                    contentColor = AppColors.error
                 )
             ) {
                 Icon(
@@ -257,8 +258,8 @@ fun EditEmployeeScreen(
                                 viewModel.selectEmployee(updatedEmployee)
                             },
                             colors = SwitchDefaults.colors(
-                                checkedThumbColor = AppColors.SuccessGreen,
-                                checkedTrackColor = AppColors.SuccessGreen.copy(alpha = 0.5f)
+                                checkedThumbColor = AppColors.success,
+                                checkedTrackColor = AppColors.success.copy(alpha = 0.5f)
                             )
                         )
                     }
@@ -266,7 +267,7 @@ fun EditEmployeeScreen(
                     if (!employeeForm.isActive) {
                         Card(
                             colors = CardDefaults.cardColors(
-                                containerColor = AppColors.WarningYellow.copy(alpha = 0.1f)
+                                containerColor = AppColors.warning.copy(alpha = 0.1f)
                             )
                         ) {
                             Row(
@@ -280,7 +281,7 @@ fun EditEmployeeScreen(
                                 Text(
                                     text = "El empleado estará inactivo y no aparecerá en las listas principales",
                                     style = MaterialTheme.typography.bodySmall,
-                                    color = AppColors.WarningYellow
+                                    color = AppColors.warning
                                 )
                             }
                         }
@@ -540,7 +541,7 @@ fun EditEmployeeScreen(
                         onNavigateBack()
                     },
                     colors = ButtonDefaults.textButtonColors(
-                        contentColor = AppColors.DangerRed
+                        contentColor = AppColors.error
                     )
                 ) {
                     Text("Eliminar Definitivamente")
@@ -552,8 +553,8 @@ fun EditEmployeeScreen(
                 }
             },
             containerColor = MaterialTheme.colorScheme.surface,
-            iconContentColor = AppColors.DangerRed,
-            titleContentColor = AppColors.DangerRed
+            iconContentColor = AppColors.error,
+            titleContentColor = AppColors.error
         )
     }
 }

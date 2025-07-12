@@ -7,6 +7,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.Note
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -82,7 +84,7 @@ fun EmployeeDetailScreen(
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(
-                            imageVector = Icons.Default.ArrowBack,
+                            imageVector = Icons.AutoMirrored.Default.ArrowBack,
                             contentDescription = "Regresar"
                         )
                     }
@@ -209,7 +211,7 @@ fun EmployeeDetailScreen(
                             showDeactivateDialog = false
                         }
                     ) {
-                        Text("Desactivar", color = AppColors.DangerRed)
+                        Text("Desactivar", color = AppColors.error)
                     }
                 },
                 dismissButton = {
@@ -336,7 +338,7 @@ private fun EmployeeHeaderCard(employee: Employee) {
                 // Salario
                 Card(
                     colors = CardDefaults.cardColors(
-                        containerColor = AppColors.SuccessGreen.copy(alpha = 0.1f)
+                        containerColor = AppColors.success.copy(alpha = 0.1f)
                     )
                 ) {
                     Text(
@@ -344,7 +346,7 @@ private fun EmployeeHeaderCard(employee: Employee) {
                         style = MaterialTheme.typography.titleMedium.copy(
                             fontWeight = FontWeight.Bold
                         ),
-                        color = AppColors.SuccessGreen,
+                        color = AppColors.success,
                         modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
                     )
                 }
@@ -357,8 +359,8 @@ private fun EmployeeHeaderCard(employee: Employee) {
 private fun StatusChip(isActive: Boolean) {
     val (backgroundColor, textColor, text, icon) = if (isActive) {
         listOf(
-            AppColors.SuccessGreen.copy(alpha = 0.1f),
-            AppColors.SuccessGreen,
+            AppColors.success.copy(alpha = 0.1f),
+            AppColors.success,
             "Activo",
             "✅"
         )
@@ -592,7 +594,7 @@ private fun ActionButton(
 private fun NotesCard(notes: String) {
     InfoCard(
         title = "Notas Adicionales",
-        icon = Icons.Default.Note
+        icon = Icons.AutoMirrored.Filled.Note
     ) {
         Text(
             text = notes,

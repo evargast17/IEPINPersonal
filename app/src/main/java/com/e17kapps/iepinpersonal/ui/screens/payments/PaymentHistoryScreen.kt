@@ -9,6 +9,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.*
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -25,7 +26,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.e17kapps.iepinpersonal.domain.model.*
 import com.e17kapps.iepinpersonal.ui.components.LoadingState
 import com.e17kapps.iepinpersonal.ui.theme.AppColors
-import com.e17kapps.iepinpersonal.utils.formatCurrency
 import com.e17kapps.iepinpersonal.utils.toCurrency
 import com.e17kapps.iepinpersonal.utils.toDateString
 import java.util.*
@@ -87,7 +87,7 @@ fun PaymentHistoryScreen(
             navigationIcon = {
                 IconButton(onClick = onNavigateBack) {
                     Icon(
-                        imageVector = Icons.Default.ArrowBack,
+                        imageVector = Icons.AutoMirrored.Default.ArrowBack,
                         contentDescription = "Volver"
                     )
                 }
@@ -561,7 +561,7 @@ private fun PaymentHistoryItem(
             Spacer(modifier = Modifier.width(8.dp))
 
             Icon(
-                imageVector = Icons.Default.KeyboardArrowRight,
+                imageVector = Icons.AutoMirrored.Default.KeyboardArrowRight,
                 contentDescription = "Ver detalles",
                 tint = AppColors.TextSecondary
             )
