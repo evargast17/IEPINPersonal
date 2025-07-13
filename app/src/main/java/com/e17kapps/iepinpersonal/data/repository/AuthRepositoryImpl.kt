@@ -3,7 +3,6 @@ package com.e17kapps.iepinpersonal.data.repository
 import com.e17kapps.iepinpersonal.data.model.UserDocument
 import com.e17kapps.iepinpersonal.data.remote.FirebaseConfig
 import com.e17kapps.iepinpersonal.domain.model.User
-import com.e17kapps.iepinpersonal.domain.model.UserRole
 import com.e17kapps.iepinpersonal.domain.repository.AuthRepository
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -44,10 +43,10 @@ class AuthRepositoryImpl @Inject constructor(
                 } else {
                     // Si no existe el documento del usuario, crearlo
                     val newUser = User(
-                        id = firebaseUser.uid,
+                        uid = firebaseUser.uid,
                         email = firebaseUser.email ?: email,
-                        name = firebaseUser.displayName ?: "",
-                        role = UserRole.USER
+                        displayName = firebaseUser.displayName ?: "",
+                        updatedAt = 0
                     )
                     createUserDocument(newUser)
                     Result.success(newUser)
@@ -67,10 +66,10 @@ class AuthRepositoryImpl @Inject constructor(
 
             if (firebaseUser != null) {
                 val user = User(
-                    id = firebaseUser.uid,
+                    uid = firebaseUser.uid,
                     email = email,
-                    name = name,
-                    role = UserRole.USER
+                    displayName = name,
+                    updatedAt = 0
                 )
 
                 createUserDocument(user)
@@ -137,7 +136,7 @@ class AuthRepositoryImpl @Inject constructor(
         return try {
             val userDocument = UserDocument.fromDomain(user.copy(updatedAt = System.currentTimeMillis()))
             firestore.collection(FirebaseConfig.USERS_COLLECTION)
-                .document(user.id)
+                .document(user.uid)
                 .set(userDocument)
                 .await()
 
@@ -182,7 +181,7 @@ class AuthRepositoryImpl @Inject constructor(
     private suspend fun createUserDocument(user: User) {
         val userDocument = UserDocument.fromDomain(user)
         firestore.collection(FirebaseConfig.USERS_COLLECTION)
-            .document(user.id)
+            .document(user.uid)
             .set(userDocument)
             .await()
     }

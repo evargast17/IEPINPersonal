@@ -1,21 +1,22 @@
 package com.e17kapps.iepinpersonal.data.model
 
+import android.view.Display
 import com.e17kapps.iepinpersonal.domain.model.*
 
 // Firebase User Document
 data class UserDocument(
-    val id: String = "",
+    val uid: String = "",
     val email: String = "",
-    val name: String = "",
+    val displayNname: String = "",
     val role: String = "USER",
     val isActive: Boolean = true,
     val createdAt: Long = System.currentTimeMillis(),
-    val updatedAt: Long = System.currentTimeMillis()
+    val updatedAt: Long? = System.currentTimeMillis()
 ) {
     fun toDomain(): User = User(
-        id = id,
+        uid = uid,
         email = email,
-        name = name,
+        displayName = displayNname,
         role = UserRole.valueOf(role),
         isActive = isActive,
         createdAt = createdAt,
@@ -24,9 +25,9 @@ data class UserDocument(
 
     companion object {
         fun fromDomain(user: User): UserDocument = UserDocument(
-            id = user.id,
+            uid = user.uid,
             email = user.email,
-            name = user.name,
+            displayNname = user.displayName,
             role = user.role.name,
             isActive = user.isActive,
             createdAt = user.createdAt,

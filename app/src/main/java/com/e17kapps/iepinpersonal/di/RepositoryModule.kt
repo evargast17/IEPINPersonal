@@ -5,11 +5,13 @@ import com.e17kapps.iepinpersonal.data.repository.DiscountRepositoryImpl
 import com.e17kapps.iepinpersonal.data.repository.EmployeeRepositoryImpl
 import com.e17kapps.iepinpersonal.data.repository.PaymentRepositoryImpl
 import com.e17kapps.iepinpersonal.data.repository.StatisticsRepositoryImpl
+import com.e17kapps.iepinpersonal.data.repository.UserRepositoryImpl
 import com.e17kapps.iepinpersonal.domain.repository.AuthRepository
 import com.e17kapps.iepinpersonal.domain.repository.DiscountRepository
 import com.e17kapps.iepinpersonal.domain.repository.EmployeeRepository
 import com.e17kapps.iepinpersonal.domain.repository.PaymentRepository
 import com.e17kapps.iepinpersonal.domain.repository.StatisticsRepository
+import com.e17kapps.iepinpersonal.domain.repository.UserRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -49,4 +51,10 @@ abstract class RepositoryModule {
     abstract fun bindDiscountRepository(
         discountRepositoryImpl: DiscountRepositoryImpl
     ): DiscountRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindUserRepository(
+        userRepositoryImpl: UserRepositoryImpl
+    ): UserRepository
 }
