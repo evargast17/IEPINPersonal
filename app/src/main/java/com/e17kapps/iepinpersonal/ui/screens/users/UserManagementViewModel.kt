@@ -64,7 +64,6 @@ class UserManagementViewModel @Inject constructor(
         displayName: String,
         password: String,
         role: UserRole,
-        department: String
     ) {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true, errorMessage = null)
@@ -189,8 +188,3 @@ class UserManagementViewModel @Inject constructor(
     }
 }
 
-data class UserManagementUiState(
-    val isLoading: Boolean = false,
-    val errorMessage: String? = null,
-    val successMessage: String? = null
-)

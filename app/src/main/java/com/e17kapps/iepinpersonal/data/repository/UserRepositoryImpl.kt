@@ -1,57 +1,77 @@
 package com.e17kapps.iepinpersonal.data.repository
 
+import com.e17kapps.iepinpersonal.data.model.UserDocument
 import com.e17kapps.iepinpersonal.domain.model.User
 import com.e17kapps.iepinpersonal.domain.model.UserRole
 import com.e17kapps.iepinpersonal.domain.repository.UserRepository
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
+import java.security.MessageDigest
 import javax.inject.Inject
 import javax.inject.Singleton
 
-
 @Singleton
 class UserRepositoryImpl @Inject constructor(
-    private val firestore: FirebaseFirestore,
-    private val auth: FirebaseAuth
+    private val firestore: FirebaseFirestore
 ) : UserRepository {
 
     private val usersCollection = firestore.collection("users")
+    private var currentUserId: String? = null
+
+    fun setCurrentUser(userId: String?) {
+        currentUserId = userId
+    }
 
     override suspend fun createUser(user: User, password: String): Result<String> {
         return try {
-            // Crear usuario en Firebase Auth
-            val authResult = auth.createUserWithEmailAndPassword(user.email, password).await()
-            val newUserId = authResult.user?.uid ?: throw Exception("Error al crear usuario en Auth")
+            // Verificar si ya existe un usuario con este email
+            val existingUser = usersCollection
+                .whereEqualTo("email", user.email.lowercase())
+                .get()
+                .await()
 
-            // Crear documento del usuario en Firestore
+            if (existingUser.documents.isNotEmpty()) {
+                return Result.failure(Exception("Ya existe un usuario con este email"))
+            }
+
+            val newUserId = usersCollection.document().id
+            val hashedPassword = hashPassword(password)
+
             val userData = user.copy(
                 uid = newUserId,
-                createdBy = auth.currentUser?.uid ?: "",
+                email = user.email.lowercase(),
+                password = hashedPassword,
+                createdBy = currentUserId ?: "",
+                createdAt = System.currentTimeMillis(),
+                updatedAt = System.currentTimeMillis()
             )
 
+            val userDocument = UserDocument.fromDomain(userData)
             usersCollection.document(newUserId)
-                .set(userData.toMap())
+                .set(userDocument)
                 .await()
 
             Result.success(newUserId)
         } catch (e: Exception) {
-            Result.failure(e)
+            Result.failure(Exception("Error al crear usuario: ${e.message}"))
         }
     }
 
     override suspend fun updateUser(user: User): Result<Unit> {
         return try {
+            val userDocument = UserDocument.fromDomain(
+                user.copy(updatedAt = System.currentTimeMillis())
+            )
             usersCollection.document(user.uid)
-                .set(user.toMap())
+                .set(userDocument)
                 .await()
             Result.success(Unit)
         } catch (e: Exception) {
-            Result.failure(e)
+            Result.failure(Exception("Error al actualizar usuario: ${e.message}"))
         }
     }
 
@@ -59,11 +79,16 @@ class UserRepositoryImpl @Inject constructor(
         return try {
             // Marcar como inactivo en lugar de eliminar
             usersCollection.document(userId)
-                .update("isActive", false)
+                .update(
+                    mapOf(
+                        "isActive" to false,
+                        "updatedAt" to System.currentTimeMillis()
+                    )
+                )
                 .await()
             Result.success(Unit)
         } catch (e: Exception) {
-            Result.failure(e)
+            Result.failure(Exception("Error al eliminar usuario: ${e.message}"))
         }
     }
 
@@ -71,126 +96,134 @@ class UserRepositoryImpl @Inject constructor(
         return try {
             val doc = usersCollection.document(userId).get().await()
             if (doc.exists()) {
-                val user = doc.toUser()
-                Result.success(user)
+                val userDocument = doc.toObject(UserDocument::class.java)
+                if (userDocument != null) {
+                    Result.success(userDocument.toDomain())
+                } else {
+                    Result.failure(Exception("Error al procesar datos del usuario"))
+                }
             } else {
                 Result.failure(Exception("Usuario no encontrado"))
             }
         } catch (e: Exception) {
-            Result.failure(e)
+            Result.failure(Exception("Error al obtener usuario: ${e.message}"))
         }
     }
 
     override suspend fun getCurrentUser(): Result<User?> {
         return try {
-            val currentUserId = auth.currentUser?.uid
+            val currentUserId = this.currentUserId
             if (currentUserId != null) {
                 getUser(currentUserId)
             } else {
                 Result.success(null)
             }
         } catch (e: Exception) {
-            Result.failure(e)
+            Result.failure(Exception("Error al obtener usuario actual: ${e.message}"))
         }
     }
 
     override suspend fun getAllUsers(): Result<List<User>> {
         return try {
-            val querySnapshot = usersCollection
-                .orderBy("createdAt", Query.Direction.DESCENDING)
+            val snapshot = usersCollection
+                .orderBy("displayName", Query.Direction.ASCENDING)
                 .get()
                 .await()
 
-            val users = querySnapshot.documents.mapNotNull { doc ->
-                try {
-                    doc.toUser()
-                } catch (e: Exception) {
-                    null
-                }
+            val users = snapshot.documents.mapNotNull { doc ->
+                doc.toObject(UserDocument::class.java)?.toDomain()
             }
 
             Result.success(users)
         } catch (e: Exception) {
-            Result.failure(e)
+            Result.failure(Exception("Error al obtener usuarios: ${e.message}"))
         }
     }
 
     override suspend fun getUsersByRole(role: UserRole): Result<List<User>> {
         return try {
-            val querySnapshot = usersCollection
+            val snapshot = usersCollection
                 .whereEqualTo("role", role.name)
-                .orderBy("createdAt", Query.Direction.DESCENDING)
+                .whereEqualTo("isActive", true)
+                .orderBy("displayName", Query.Direction.ASCENDING)
                 .get()
                 .await()
 
-            val users = querySnapshot.documents.mapNotNull { doc ->
-                try {
-                    doc.toUser()
-                } catch (e: Exception) {
-                    null
-                }
+            val users = snapshot.documents.mapNotNull { doc ->
+                doc.toObject(UserDocument::class.java)?.toDomain()
             }
 
             Result.success(users)
         } catch (e: Exception) {
-            Result.failure(e)
+            Result.failure(Exception("Error al obtener usuarios por rol: ${e.message}"))
         }
     }
 
     override suspend fun updateUserRole(userId: String, role: UserRole): Result<Unit> {
         return try {
             usersCollection.document(userId)
-                .update("role", role.name)
+                .update(
+                    mapOf(
+                        "role" to role.name,
+                        "updatedAt" to System.currentTimeMillis()
+                    )
+                )
                 .await()
             Result.success(Unit)
         } catch (e: Exception) {
-            Result.failure(e)
+            Result.failure(Exception("Error al actualizar rol: ${e.message}"))
         }
     }
 
     override suspend fun activateUser(userId: String): Result<Unit> {
         return try {
             usersCollection.document(userId)
-                .update("isActive", true)
+                .update(
+                    mapOf(
+                        "isActive" to true,
+                        "updatedAt" to System.currentTimeMillis()
+                    )
+                )
                 .await()
             Result.success(Unit)
         } catch (e: Exception) {
-            Result.failure(e)
+            Result.failure(Exception("Error al activar usuario: ${e.message}"))
         }
     }
 
     override suspend fun deactivateUser(userId: String): Result<Unit> {
         return try {
             usersCollection.document(userId)
-                .update("isActive", false)
+                .update(
+                    mapOf(
+                        "isActive" to false,
+                        "updatedAt" to System.currentTimeMillis()
+                    )
+                )
                 .await()
             Result.success(Unit)
         } catch (e: Exception) {
-            Result.failure(e)
+            Result.failure(Exception("Error al desactivar usuario: ${e.message}"))
         }
     }
 
     override fun getUsersFlow(): Flow<List<User>> = callbackFlow {
-        val listenerRegistration = usersCollection
-            .orderBy("createdAt", Query.Direction.DESCENDING)
-            .addSnapshotListener { querySnapshot, error ->
+        val listener = usersCollection
+            .orderBy("displayName", Query.Direction.ASCENDING)
+            .addSnapshotListener { snapshot, error ->
                 if (error != null) {
-                    close(error)
+                    trySend(emptyList())
                     return@addSnapshotListener
                 }
 
-                val users = querySnapshot?.documents?.mapNotNull { doc ->
-                    try {
-                        doc.toUser()
-                    } catch (e: Exception) {
-                        null
-                    }
+                val users = snapshot?.documents?.mapNotNull { doc ->
+                    doc.toObject(UserDocument::class.java)?.toDomain()
                 } ?: emptyList()
 
                 trySend(users)
             }
 
-        awaitClose { listenerRegistration.remove() }
+        awaitClose { listener.remove() }
     }
 
     override suspend fun updateLastLogin(userId: String): Result<Unit> {
@@ -200,43 +233,13 @@ class UserRepositoryImpl @Inject constructor(
                 .await()
             Result.success(Unit)
         } catch (e: Exception) {
-            Result.failure(e)
+            Result.failure(Exception("Error al actualizar último login: ${e.message}"))
         }
     }
 
-    // Extension functions para conversión
-    private fun User.toMap(): Map<String, Any?> {
-        return mapOf(
-            "uid" to uid,
-            "email" to email,
-            "displayName" to displayName,
-            "role" to role.name,
-            "isActive" to isActive,
-            "department" to department,
-            "createdAt" to createdAt,
-            "createdBy" to createdBy,
-            "lastLogin" to lastLogin,
-            "photoUrl" to photoUrl
-        )
-    }
-
-    private fun com.google.firebase.firestore.DocumentSnapshot.toUser(): User {
-        return User(
-            uid = getString("uid") ?: "",
-            email = getString("email") ?: "",
-            displayName = getString("displayName") ?: "",
-            photoUrl = getString("photoUrl"),
-            role = try {
-                UserRole.valueOf(getString("role") ?: "OPERATOR")
-            } catch (e: Exception) {
-                UserRole.OPERATOR
-            },
-            isActive = getBoolean("isActive") ?: true,
-            department = getString("department") ?: "",
-            createdAt = getLong("createdAt") ?: System.currentTimeMillis(),
-            createdBy = getString("createdBy") ?: "",
-            lastLogin = getLong("lastLogin"),
-            updatedAt = getLong("updatedAt")
-        )
+    private fun hashPassword(password: String): String {
+        val digest = MessageDigest.getInstance("SHA-256")
+        val hashBytes = digest.digest(password.toByteArray())
+        return hashBytes.joinToString("") { "%02x".format(it) }
     }
 }

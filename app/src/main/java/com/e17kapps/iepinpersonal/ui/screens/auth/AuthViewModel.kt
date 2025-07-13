@@ -2,6 +2,8 @@ package com.e17kapps.iepinpersonal.ui.screens.auth
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.e17kapps.iepinpersonal.data.repository.UserRepositoryImpl
+import com.e17kapps.iepinpersonal.domain.manager.RoleManager
 import com.e17kapps.iepinpersonal.domain.model.AuthState
 import com.e17kapps.iepinpersonal.domain.model.LoginUiState
 import com.e17kapps.iepinpersonal.domain.model.User
@@ -15,7 +17,9 @@ import javax.inject.Inject
 
 @HiltViewModel
 class AuthViewModel @Inject constructor(
-    private val authRepository: AuthRepository
+    private val authRepository: AuthRepository,
+    private val userRepository: UserRepositoryImpl,
+    private val roleManager: RoleManager
 ) : ViewModel() {
 
     private val _authState = MutableStateFlow<AuthState>(AuthState.Loading)
@@ -33,10 +37,20 @@ class AuthViewModel @Inject constructor(
     }
 
     private fun checkAuthState() {
-        if (authRepository.isUserLoggedIn()) {
-            _authState.value = AuthState.Authenticated
-        } else {
-            _authState.value = AuthState.Unauthenticated
+        viewModelScope.launch {
+            try {
+                val user = authRepository.getCurrentUser()
+                if (user != null) {
+                    _currentUser.value = user
+                    userRepository.setCurrentUser(user.uid)
+                    roleManager.loadCurrentUser()
+                    _authState.value = AuthState.Authenticated
+                } else {
+                    _authState.value = AuthState.Unauthenticated
+                }
+            } catch (e: Exception) {
+                _authState.value = AuthState.Unauthenticated
+            }
         }
     }
 
@@ -45,8 +59,12 @@ class AuthViewModel @Inject constructor(
             authRepository.getCurrentUserFlow().collect { user ->
                 _currentUser.value = user
                 if (user != null) {
+                    userRepository.setCurrentUser(user.uid)
+                    roleManager.loadCurrentUser()
                     _authState.value = AuthState.Authenticated
                 } else {
+                    userRepository.setCurrentUser(null)
+                    roleManager.clearCurrentUser()
                     _authState.value = AuthState.Unauthenticated
                 }
             }
@@ -84,9 +102,11 @@ class AuthViewModel @Inject constructor(
         _authState.value = AuthState.Loading
 
         viewModelScope.launch {
-            authRepository.login(currentState.email, currentState.password)
+            authRepository.login(currentState.email.trim(), currentState.password)
                 .onSuccess { user ->
                     _currentUser.value = user
+                    userRepository.setCurrentUser(user.uid)
+                    roleManager.loadCurrentUser()
                     _authState.value = AuthState.Authenticated
                     _loginUiState.value = LoginUiState() // Reset form
                 }
@@ -100,64 +120,18 @@ class AuthViewModel @Inject constructor(
         }
     }
 
-    fun register(name: String, email: String, password: String, confirmPassword: String) {
-        if (!isValidRegisterForm(name, email, password, confirmPassword)) {
-            return
-        }
-
-        _loginUiState.value = _loginUiState.value.copy(isLoading = true, errorMessage = null)
-        _authState.value = AuthState.Loading
-
-        viewModelScope.launch {
-            authRepository.register(email, password, name)
-                .onSuccess { user ->
-                    _currentUser.value = user
-                    _authState.value = AuthState.Authenticated
-                    _loginUiState.value = LoginUiState() // Reset form
-                }
-                .onFailure { exception ->
-                    _authState.value = AuthState.Error(exception.message ?: "Error al crear cuenta")
-                    _loginUiState.value = _loginUiState.value.copy(
-                        isLoading = false,
-                        errorMessage = exception.message ?: "Error al crear cuenta"
-                    )
-                }
-        }
-    }
-
     fun logout() {
         viewModelScope.launch {
             authRepository.logout()
                 .onSuccess {
                     _currentUser.value = null
+                    userRepository.setCurrentUser(null)
+                    roleManager.clearCurrentUser()
                     _authState.value = AuthState.Unauthenticated
                     _loginUiState.value = LoginUiState() // Reset form
                 }
                 .onFailure { exception ->
                     _authState.value = AuthState.Error(exception.message ?: "Error al cerrar sesión")
-                }
-        }
-    }
-
-    fun resetPassword(email: String) {
-        if (email.isBlank()) {
-            _loginUiState.value = _loginUiState.value.copy(
-                errorMessage = "Ingresa tu correo electrónico"
-            )
-            return
-        }
-
-        viewModelScope.launch {
-            authRepository.resetPassword(email)
-                .onSuccess {
-                    _loginUiState.value = _loginUiState.value.copy(
-                        errorMessage = "Se envió un correo para restablecer tu contraseña"
-                    )
-                }
-                .onFailure { exception ->
-                    _loginUiState.value = _loginUiState.value.copy(
-                        errorMessage = exception.message ?: "Error al enviar correo"
-                    )
                 }
         }
     }
@@ -170,54 +144,32 @@ class AuthViewModel @Inject constructor(
     }
 
     private fun isValidLoginForm(state: LoginUiState): Boolean {
-        when {
+        return when {
             state.email.isBlank() -> {
-                _loginUiState.value = state.copy(errorMessage = "El correo es requerido")
-                return false
+                _loginUiState.value = state.copy(
+                    errorMessage = "El correo electrónico es requerido"
+                )
+                false
             }
             !android.util.Patterns.EMAIL_ADDRESS.matcher(state.email).matches() -> {
-                _loginUiState.value = state.copy(errorMessage = "Correo electrónico no válido")
-                return false
+                _loginUiState.value = state.copy(
+                    errorMessage = "Formato de correo electrónico inválido"
+                )
+                false
             }
             state.password.isBlank() -> {
-                _loginUiState.value = state.copy(errorMessage = "La contraseña es requerida")
-                return false
+                _loginUiState.value = state.copy(
+                    errorMessage = "La contraseña es requerida"
+                )
+                false
             }
             state.password.length < 6 -> {
-                _loginUiState.value = state.copy(errorMessage = "La contraseña debe tener al menos 6 caracteres")
-                return false
+                _loginUiState.value = state.copy(
+                    errorMessage = "La contraseña debe tener al menos 6 caracteres"
+                )
+                false
             }
+            else -> true
         }
-        return true
-    }
-
-    private fun isValidRegisterForm(name: String, email: String, password: String, confirmPassword: String): Boolean {
-        when {
-            name.isBlank() -> {
-                _loginUiState.value = _loginUiState.value.copy(errorMessage = "El nombre es requerido")
-                return false
-            }
-            email.isBlank() -> {
-                _loginUiState.value = _loginUiState.value.copy(errorMessage = "El correo es requerido")
-                return false
-            }
-            !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches() -> {
-                _loginUiState.value = _loginUiState.value.copy(errorMessage = "Correo electrónico no válido")
-                return false
-            }
-            password.isBlank() -> {
-                _loginUiState.value = _loginUiState.value.copy(errorMessage = "La contraseña es requerida")
-                return false
-            }
-            password.length < 6 -> {
-                _loginUiState.value = _loginUiState.value.copy(errorMessage = "La contraseña debe tener al menos 6 caracteres")
-                return false
-            }
-            password != confirmPassword -> {
-                _loginUiState.value = _loginUiState.value.copy(errorMessage = "Las contraseñas no coinciden")
-                return false
-            }
-        }
-        return true
     }
 }

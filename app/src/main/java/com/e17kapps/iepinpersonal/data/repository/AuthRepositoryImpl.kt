@@ -3,13 +3,14 @@ package com.e17kapps.iepinpersonal.data.repository
 import com.e17kapps.iepinpersonal.data.model.UserDocument
 import com.e17kapps.iepinpersonal.data.remote.FirebaseConfig
 import com.e17kapps.iepinpersonal.domain.model.User
+import com.e17kapps.iepinpersonal.domain.model.UserRole
 import com.e17kapps.iepinpersonal.domain.repository.AuthRepository
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
+import java.security.MessageDigest
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -18,73 +19,83 @@ class AuthRepositoryImpl @Inject constructor(
     private val firebaseConfig: FirebaseConfig
 ) : AuthRepository {
 
-    private val auth: FirebaseAuth = firebaseConfig.auth
     private val firestore: FirebaseFirestore = firebaseConfig.firestore
+    private var currentUser: User? = null
 
     override suspend fun login(email: String, password: String): Result<User> {
         return try {
-            val authResult = auth.signInWithEmailAndPassword(email, password).await()
-            val firebaseUser = authResult.user
+            val hashedPassword = hashPassword(password)
 
-            if (firebaseUser != null) {
-                val userDoc = firestore.collection(FirebaseConfig.USERS_COLLECTION)
-                    .document(firebaseUser.uid)
-                    .get()
-                    .await()
+            val userSnapshot = firestore.collection(FirebaseConfig.USERS_COLLECTION)
+                .whereEqualTo("email", email.lowercase())
+                .whereEqualTo("password", hashedPassword)
+                .whereEqualTo("isActive", true)
+                .get()
+                .await()
 
-                if (userDoc.exists()) {
-                    val userDocument = userDoc.toObject(UserDocument::class.java)
-                    if (userDocument != null && userDocument.isActive) {
-                        Result.success(userDocument.toDomain())
-                    } else {
-                        auth.signOut()
-                        Result.failure(Exception("Usuario inactivo o no encontrado"))
-                    }
+            if (userSnapshot.documents.isNotEmpty()) {
+                val userDocument = userSnapshot.documents.first().toObject(UserDocument::class.java)
+                if (userDocument != null) {
+                    val user = userDocument.toDomain()
+                    currentUser = user
+
+                    // Actualizar último login
+                    updateLastLogin(user.uid)
+
+                    Result.success(user)
                 } else {
-                    // Si no existe el documento del usuario, crearlo
-                    val newUser = User(
-                        uid = firebaseUser.uid,
-                        email = firebaseUser.email ?: email,
-                        displayName = firebaseUser.displayName ?: "",
-                        updatedAt = 0
-                    )
-                    createUserDocument(newUser)
-                    Result.success(newUser)
+                    Result.failure(Exception("Error al obtener datos del usuario"))
                 }
             } else {
-                Result.failure(Exception("Error de autenticación"))
+                Result.failure(Exception("Credenciales incorrectas"))
             }
         } catch (e: Exception) {
-            Result.failure(e)
+            Result.failure(Exception("Error de conexión: ${e.message}"))
         }
     }
 
     override suspend fun register(email: String, password: String, name: String): Result<User> {
         return try {
-            val authResult = auth.createUserWithEmailAndPassword(email, password).await()
-            val firebaseUser = authResult.user
+            // Verificar si ya existe un usuario con este email
+            val existingUser = firestore.collection(FirebaseConfig.USERS_COLLECTION)
+                .whereEqualTo("email", email.lowercase())
+                .get()
+                .await()
 
-            if (firebaseUser != null) {
-                val user = User(
-                    uid = firebaseUser.uid,
-                    email = email,
-                    displayName = name,
-                    updatedAt = 0
-                )
-
-                createUserDocument(user)
-                Result.success(user)
-            } else {
-                Result.failure(Exception("Error al crear la cuenta"))
+            if (existingUser.documents.isNotEmpty()) {
+                return Result.failure(Exception("Ya existe un usuario con este email"))
             }
+
+            val uid = firestore.collection(FirebaseConfig.USERS_COLLECTION).document().id
+            val hashedPassword = hashPassword(password)
+
+            val user = User(
+                uid = uid,
+                email = email.lowercase(),
+                displayName = name,
+                role = UserRole.OPERATOR, // Por defecto OPERATOR
+                password = hashedPassword,
+                isActive = true,
+                createdAt = System.currentTimeMillis(),
+                createdBy = currentUser?.uid ?: "",
+                updatedAt = System.currentTimeMillis()
+            )
+
+            val userDocument = UserDocument.fromDomain(user)
+            firestore.collection(FirebaseConfig.USERS_COLLECTION)
+                .document(uid)
+                .set(userDocument)
+                .await()
+
+            Result.success(user)
         } catch (e: Exception) {
-            Result.failure(e)
+            Result.failure(Exception("Error al crear usuario: ${e.message}"))
         }
     }
 
     override suspend fun logout(): Result<Unit> {
         return try {
-            auth.signOut()
+            currentUser = null
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)
@@ -92,44 +103,30 @@ class AuthRepositoryImpl @Inject constructor(
     }
 
     override suspend fun getCurrentUser(): User? {
-        return try {
-            val firebaseUser = auth.currentUser
-            if (firebaseUser != null) {
-                val userDoc = firestore.collection(FirebaseConfig.USERS_COLLECTION)
-                    .document(firebaseUser.uid)
-                    .get()
-                    .await()
-
-                userDoc.toObject(UserDocument::class.java)?.toDomain()
-            } else {
-                null
-            }
-        } catch (e: Exception) {
-            null
-        }
+        return currentUser
     }
 
     override fun getCurrentUserFlow(): Flow<User?> = callbackFlow {
-        val authStateListener = FirebaseAuth.AuthStateListener { auth ->
-            val firebaseUser = auth.currentUser
-            if (firebaseUser != null) {
-                // Escuchar cambios en el documento del usuario
-                val userDocRef = firestore.collection(FirebaseConfig.USERS_COLLECTION)
-                    .document(firebaseUser.uid)
+        if (currentUser != null) {
+            val userDocRef = firestore.collection(FirebaseConfig.USERS_COLLECTION)
+                .document(currentUser!!.uid)
 
-                userDocRef.get().addOnSuccessListener { snapshot ->
-                    val user = snapshot.toObject(UserDocument::class.java)?.toDomain()
-                    trySend(user)
-                }.addOnFailureListener {
+            val listener = userDocRef.addSnapshotListener { snapshot, error ->
+                if (error != null) {
                     trySend(null)
+                    return@addSnapshotListener
                 }
-            } else {
-                trySend(null)
-            }
-        }
 
-        auth.addAuthStateListener(authStateListener)
-        awaitClose { auth.removeAuthStateListener(authStateListener) }
+                val user = snapshot?.toObject(UserDocument::class.java)?.toDomain()
+                currentUser = user
+                trySend(user)
+            }
+
+            awaitClose { listener.remove() }
+        } else {
+            trySend(null)
+            awaitClose { }
+        }
     }
 
     override suspend fun updateUserProfile(user: User): Result<Unit> {
@@ -140,6 +137,10 @@ class AuthRepositoryImpl @Inject constructor(
                 .set(userDocument)
                 .await()
 
+            if (currentUser?.uid == user.uid) {
+                currentUser = user
+            }
+
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)
@@ -148,7 +149,8 @@ class AuthRepositoryImpl @Inject constructor(
 
     override suspend fun resetPassword(email: String): Result<Unit> {
         return try {
-            auth.sendPasswordResetEmail(email).await()
+            // En un sistema real, aquí enviarías un email de recuperación
+            // Para este ejemplo, retornamos éxito
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)
@@ -156,21 +158,17 @@ class AuthRepositoryImpl @Inject constructor(
     }
 
     override fun isUserLoggedIn(): Boolean {
-        return auth.currentUser != null
+        return currentUser != null
     }
 
     override suspend fun deleteAccount(): Result<Unit> {
         return try {
-            val user = auth.currentUser
-            if (user != null) {
-                // Eliminar documento del usuario
+            currentUser?.let { user ->
                 firestore.collection(FirebaseConfig.USERS_COLLECTION)
                     .document(user.uid)
-                    .delete()
+                    .update("isActive", false)
                     .await()
-
-                // Eliminar cuenta de Firebase Auth
-                user.delete().await()
+                currentUser = null
             }
             Result.success(Unit)
         } catch (e: Exception) {
@@ -178,11 +176,20 @@ class AuthRepositoryImpl @Inject constructor(
         }
     }
 
-    private suspend fun createUserDocument(user: User) {
-        val userDocument = UserDocument.fromDomain(user)
-        firestore.collection(FirebaseConfig.USERS_COLLECTION)
-            .document(user.uid)
-            .set(userDocument)
-            .await()
+    private suspend fun updateLastLogin(userId: String) {
+        try {
+            firestore.collection(FirebaseConfig.USERS_COLLECTION)
+                .document(userId)
+                .update("lastLogin", System.currentTimeMillis())
+                .await()
+        } catch (e: Exception) {
+            // Log error but don't throw
+        }
+    }
+
+    private fun hashPassword(password: String): String {
+        val digest = MessageDigest.getInstance("SHA-256")
+        val hashBytes = digest.digest(password.toByteArray())
+        return hashBytes.joinToString("") { "%02x".format(it) }
     }
 }
