@@ -1,4 +1,4 @@
-package com.e17kapps.iepinpersonal.ui.screens.statistics
+package com.e17kapps.iepinpersonal.ui.screens.personal
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -27,7 +27,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.e17kapps.iepinpersonal.domain.model.*
 import com.e17kapps.iepinpersonal.ui.components.LoadingState
-import com.e17kapps.iepinpersonal.ui.screens.personal.EmployeeViewModel
+import com.e17kapps.iepinpersonal.ui.screens.statistics.StatisticsViewModel
 import com.e17kapps.iepinpersonal.ui.theme.AppColors
 import com.e17kapps.iepinpersonal.utils.formatCurrency
 import com.e17kapps.iepinpersonal.utils.toDateString

@@ -1,6 +1,7 @@
 package com.e17kapps.iepinpersonal.ui.screens.discounts
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -25,6 +26,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.e17kapps.iepinpersonal.domain.model.*
 import com.e17kapps.iepinpersonal.ui.components.LoadingState
 import com.e17kapps.iepinpersonal.ui.theme.AppColors
+import com.e17kapps.iepinpersonal.utils.formatCurrency
 import com.e17kapps.iepinpersonal.utils.toCurrency
 import com.e17kapps.iepinpersonal.utils.toDateString
 

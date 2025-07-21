@@ -29,7 +29,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.e17kapps.iepinpersonal.domain.model.Employee
-import com.e17kapps.iepinpersonal.ui.theme.AppColors
 import com.e17kapps.iepinpersonal.utils.formatCurrency
 
 
@@ -52,7 +51,7 @@ fun SearchBar(
         placeholder = {
             Text(
                 text = placeholder,
-                color = AppColors.TextHint
+                color = Color(0xFF9CA3AF) // TextHint
             )
         },
         leadingIcon = {
